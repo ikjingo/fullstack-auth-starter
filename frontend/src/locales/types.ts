@@ -51,8 +51,6 @@ export interface TranslationKeys {
     success: string
     successMessage: string
     failed: string
-    googleFailed: string
-    googleAuthFailed: string
     noCredential: string
   }
   register: {
@@ -62,51 +60,16 @@ export interface TranslationKeys {
     successMessage: string
     failed: string
   }
-  forgotPassword: {
-    title: string
-    subtitle: string
-    emailPlaceholder: string
-    sendCode: string
-    sendingCode: string
-    sendFailed: string
-    codeSent: string
-    codeSentMessage: string
-    resent: string
-    resentMessage: string
-    edit: string
-    resend: string
-    codePlaceholder: string
-    verifyCode: string
-    verifyingCode: string
-    codeRequired: string
-    codeRequiredMessage: string
-    codeFormatError: string
-    codeFormatErrorMessage: string
-    verified: string
-    verifiedMessage: string
-    verificationFailed: string
-    verificationFailedMessage: string
-    resetPassword: string
-    resettingPassword: string
-    resetSuccess: string
-    resetSuccessMessage: string
-    resetFailed: string
-    enterCode: string
-    rememberPassword: string
-    backToLogin: string
-  }
   myPage: {
     title: string
     role: string
     accountManagement: string
     favorites: string
     accountInfo: string
-    socialAccounts: string
     passwordNotSet: string
     passwordSet: string
     setPassword: string
     changePassword: string
-    passwordDescription: string
     passwordChangeDescription: string
     nicknameUpdated: string
     nicknameUpdatedMessage: string
@@ -117,35 +80,12 @@ export interface TranslationKeys {
     passwordChangeSuccess: string
     passwordChangeSuccessMessage: string
     passwordChangeFailed: string
-    linkGoogle: string
-    unlinkGoogle: string
-    linking: string
-    unlinking: string
-    notSupported: string
-    googleLinkSuccess: string
-    googleLinkSuccessMessage: string
-    googleLinkFailed: string
-    googleUnlinkSuccess: string
-    googleUnlinkSuccessMessage: string
-    googleUnlinkFailed: string
     loginRequired: string
     loginRequiredMessage: string
     goToLogin: string
-    google: string
-    naver: string
-    kakao: string
-    snsAccountInfo: string
-    unlink: string
-    link: string
-    unlinkFailed: string
-    unlinkFailedMessage: string
-    onlyLoginMethodWarning: string
     noFavorites: string
     passwordSetButton: string
     passwordChangeButton: string
-    unlinkConfirmTitle: string
-    unlinkConfirmDescription: string
-    unlinkConfirmButton: string
   }
   header: {
     nav: {
@@ -238,32 +178,17 @@ export interface TranslationKeys {
     UNAUTHORIZED: string
     INVALID_CREDENTIALS: string
     INVALID_TOKEN: string
-    INVALID_OAUTH_TOKEN: string
-    OAUTH_ACCOUNT_NO_PASSWORD: string
     FORBIDDEN: string
     NOT_FOUND: string
     USER_NOT_FOUND: string
-    INVALID_RESET_CODE: string
-    CODE_NOT_VERIFIED: string
     PASSWORD_MISMATCH: string
     PASSWORD_ALREADY_SET: string
     NO_PASSWORD_SET: string
     INVALID_CURRENT_PASSWORD: string
-    SOCIAL_ACCOUNT_ALREADY_LINKED: string
-    SOCIAL_PROVIDER_ALREADY_LINKED: string
-    SOCIAL_ACCOUNT_NOT_FOUND: string
-    SOCIAL_ACCOUNT_NOT_LINKED: string
-    CANNOT_UNLINK_ONLY_LOGIN_METHOD: string
     API_TOKEN_NOT_FOUND: string
     // Rate limit errors
     TOO_MANY_REQUESTS: string
     ACCOUNT_LOCKED: string
-    // Two-factor authentication errors
-    TWO_FACTOR_ALREADY_ENABLED: string
-    TWO_FACTOR_NOT_ENABLED: string
-    TWO_FACTOR_NOT_INITIATED: string
-    INVALID_TWO_FACTOR_CODE: string
-    TWO_FACTOR_REQUIRED: string
     DEFAULT_ERROR: string
   }
 }

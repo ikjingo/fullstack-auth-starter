@@ -1,7 +1,6 @@
 export { ThemeToggle } from './ThemeToggle'
 export { PageLoadingFallback } from './PageLoadingFallback'
 export { AuthPageLayout } from './AuthPageLayout'
-export { GoogleIcon, NaverIcon, KakaoIcon } from './SocialIcons'
 export { PasswordInput, type PasswordInputProps } from './PasswordInput'
 export { IconInput } from './IconInput'
 export { LoadingButton } from './LoadingButton'

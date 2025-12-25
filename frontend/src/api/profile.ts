@@ -4,7 +4,6 @@
  * 인증된 사용자의 프로필 관리 기능을 제공합니다.
  * - 닉네임 수정
  * - 비밀번호 설정/변경
- * - 소셜 계정 연동 관리
  */
 import { apiClient } from './client'
 import type {
@@ -24,11 +23,6 @@ const ENDPOINTS = {
   // 비밀번호 관리 (인증된 사용자)
   SET_PASSWORD: '/auth/set-password',
   CHANGE_PASSWORD: '/auth/change-password',
-
-  // 소셜 계정 연동
-  SOCIAL_LINK_GOOGLE: '/auth/social/link/google',
-  SOCIAL_UNLINK: (provider: string) => `/auth/social/unlink/${provider}`,
-  SOCIAL_LINKED: '/auth/social/linked',
 } as const
 
 // ============================================================================
@@ -59,7 +53,7 @@ export const profileApi = {
   // --------------------------------------------------------------------------
 
   /**
-   * 비밀번호 설정 (소셜 로그인 사용자용)
+   * 비밀번호 설정
    */
   setPassword: async (data: {
     password: string
@@ -80,35 +74,5 @@ export const profileApi = {
     data: ChangePasswordFormSchema
   ): Promise<MessageResponse> => {
     return apiClient.post<MessageResponse>(ENDPOINTS.CHANGE_PASSWORD, data)
-  },
-
-  // --------------------------------------------------------------------------
-  // 소셜 계정 연동
-  // --------------------------------------------------------------------------
-
-  /**
-   * Google 계정 연동
-   */
-  linkGoogleAccount: async (idToken: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>(
-      ENDPOINTS.SOCIAL_LINK_GOOGLE,
-      { idToken }
-    )
-    apiClient.setToken(response.token)
-    return response
-  },
-
-  /**
-   * 소셜 계정 연동 해제
-   */
-  unlinkSocialAccount: async (provider: string): Promise<MessageResponse> => {
-    return apiClient.delete<MessageResponse>(ENDPOINTS.SOCIAL_UNLINK(provider))
-  },
-
-  /**
-   * 연동된 소셜 계정 목록 조회
-   */
-  getLinkedSocialAccounts: async (): Promise<string[]> => {
-    return apiClient.get<string[]>(ENDPOINTS.SOCIAL_LINKED)
   },
 }
