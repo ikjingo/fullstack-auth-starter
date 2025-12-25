@@ -1,0 +1,70 @@
+# Test configuration for auth-api
+# This file provides sensible defaults for all required properties during testing
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  flyway:
+    enabled: false
+
+# JWT settings for testing
+jwt:
+  secret: test-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
+  access-token-expiration: 3600000
+  refresh-token-expiration: 604800000
+  issuer: zenless-test
+
+# Google OAuth test configuration
+google:
+  client-id: test-google-client-id-for-testing
+
+# Password reset settings
+password-reset:
+  code-expiration-minutes: 10
+
+# Rate limiting settings
+rate-limit:
+  auth:
+    capacity: 10
+    refill-tokens: 10
+    refill-minutes: 1
+
+# Account lockout settings
+security:
+  account-lockout:
+    enabled: true
+    max-failed-attempts: 5
+    lock-duration-minutes: 15
+
+# Dictionary API
+dictionary:
+  api-key: test-dictionary-api-key
+
+# Session settings
+session:
+  max-sessions-per-user: 5
+
+# CORS settings
+cors:
+  allowed-origins: http://localhost:5173
+  allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+  allowed-headers: Content-Type,Authorization,Accept,Accept-Language,X-Requested-With
+  exposed-headers: X-Request-Id
+  allow-credentials: true
+  max-age: 3600
+
+# Admin IP whitelist (disabled for tests)
+admin:
+  ip-whitelist:
+    enabled: false
+    allowed-ips: 127.0.0.1,::1
+    path-patterns: /api/v1/admin/**

@@ -1,0 +1,30 @@
+# Production Profile for auth-api
+# IMPORTANT: All secrets MUST be provided via environment variables
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# JWT Configuration - NO DEFAULTS in production
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION:3600000}
+  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  issuer: ${JWT_ISSUER:zenless}
+
+# Admin API IP Whitelist - 프로덕션에서 활성화 권장
+admin:
+  ip-whitelist:
+    enabled: ${ADMIN_IP_WHITELIST_ENABLED:true}
+    allowed-ips: ${ADMIN_IP_WHITELIST_ALLOWED_IPS}
+
+# Logging
+logging:
+  level:
+    root: WARN
+    com.zenless: INFO

@@ -1,0 +1,48 @@
+# Backend (Kotlin/Gradle)
+backend/.gradle/
+backend/.kotlin/
+backend/build/
+backend/*/build/
+backend/*/*/build/
+backend/*/*/*/build/
+backend/*.iml
+backend/.idea/
+
+# Frontend (Node.js)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.log
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.storybook-out/
+frontend/storybook-static/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test
+coverage/
+*.lcov
+
+# Docker
+docker-compose.override.yml

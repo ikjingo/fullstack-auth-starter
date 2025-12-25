@@ -1,0 +1,5 @@
+export { HomePage } from './HomePage'
+export { MyPage } from './MyPage'
+export { LoginPage } from './LoginPage'
+export { RegisterPage } from './RegisterPage'
+export { NotFoundPage } from './NotFoundPage'
