@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 
 /**
  * 비밀번호 관리 서비스
- * - 비밀번호 설정 (OAuth 계정)
+ * - 비밀번호 설정 (비밀번호 미설정 계정)
  * - 비밀번호 변경
  */
 @Service
@@ -72,7 +72,7 @@ class PasswordService(
 
         val user = authenticationService.findUserByIdOrThrow(userId)
 
-        // 비밀번호가 설정되지 않은 경우 (OAuth 전용 계정)
+        // 비밀번호가 설정되지 않은 경우
         if (user.password == null) {
             throw CoreApiException(ErrorType.NO_PASSWORD_SET)
         }

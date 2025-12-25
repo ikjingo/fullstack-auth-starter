@@ -23,10 +23,6 @@ admin:
   ip-whitelist:
     enabled: false
 
-# Google OAuth - 프론트엔드와 동일한 Client ID 사용
-google:
-  client-id: ${GOOGLE_CLIENT_ID:851182411302-g2qa8pe15uq3bm4r9al0p0kdhreaen28.apps.googleusercontent.com}
-
 # 로깅 설정
 logging:
   level:

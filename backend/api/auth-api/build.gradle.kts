@@ -58,9 +58,6 @@ dependencies {
     // Password Encoding
     implementation("org.springframework.security:spring-security-crypto")
 
-    // Google OAuth
-    implementation("com.google.api-client:google-api-client:2.7.2")
-
     // Swagger UI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
@@ -70,9 +67,6 @@ dependencies {
     // Caching
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
-
-    // TOTP (2FA)
-    implementation("dev.samstevens.totp:totp:1.7.1")
 
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

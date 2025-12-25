@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController
  * 회원가입, 로그인, 로그아웃, 토큰 갱신, 사용자 정보 조회를 담당합니다.
  *
  * 관련 컨트롤러:
- * - SocialAuthController: 소셜 로그인/계정 연동
  * - PasswordController: 비밀번호 관리
  */
 @RestController

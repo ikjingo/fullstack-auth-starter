@@ -6,9 +6,7 @@
 
 - **회원 인증**: 회원가입, 로그인, 로그아웃
 - **토큰 관리**: JWT 기반 Access/Refresh Token 발급 및 갱신
-- **소셜 로그인**: Google OAuth 연동
-- **비밀번호 관리**: 비밀번호 변경, 재설정
-- **2FA**: TOTP 기반 2단계 인증
+- **비밀번호 관리**: 비밀번호 설정 및 변경
 - **세션 관리**: 다중 세션 제어, 세션 강제 종료
 - **보안**: Rate Limiting, 계정 잠금, IP 기반 접근 제어
 
@@ -17,15 +15,13 @@
 - Kotlin + Spring Boot 3.5.x
 - Spring Security
 - JWT (jjwt 0.13.0)
-- Google OAuth Client
 - Bucket4j (Rate Limiting)
-- TOTP (dev.samstevens.totp)
 - Caffeine Cache
 
 ## 프로젝트 구조
 
 ```
-src/main/kotlin/com/zenless/api/auth/
+src/main/kotlin/com/starter/api/auth/
 ├── AuthApplication.kt          # 메인 애플리케이션
 ├── config/                     # 설정 클래스
 │   ├── SecurityConfig.kt       # Spring Security 설정
@@ -36,20 +32,16 @@ src/main/kotlin/com/zenless/api/auth/
 ├── controller/                 # REST 컨트롤러
 │   ├── AuthController.kt       # 인증 API
 │   ├── PasswordController.kt   # 비밀번호 API
-│   ├── SocialAuthController.kt # 소셜 인증 API
 │   ├── SessionController.kt    # 세션 관리 API
-│   ├── TwoFactorController.kt  # 2FA API
 │   ├── request/                # 요청 DTO
 │   └── response/               # 응답 DTO
 ├── service/                    # 비즈니스 로직
 │   ├── auth/                   # 인증 서비스
 │   │   ├── AuthenticationService.kt
-│   │   ├── SocialAuthService.kt
 │   │   ├── PasswordService.kt
 │   │   └── LoginAttemptService.kt
 │   ├── token/                  # 토큰 서비스
 │   ├── session/                # 세션 서비스
-│   ├── twofactor/              # 2FA 서비스
 │   ├── ratelimit/              # Rate Limit 서비스
 │   ├── audit/                  # 감사 로그 서비스
 │   └── metrics/                # 메트릭스 서비스
@@ -63,7 +55,7 @@ src/main/kotlin/com/zenless/api/auth/
 
 ## API 엔드포인트
 
-### 인증 (`/api/auth`)
+### 인증 (`/api/v1/auth`)
 
 | Method | Endpoint | 설명 |
 |--------|----------|------|
@@ -74,40 +66,20 @@ src/main/kotlin/com/zenless/api/auth/
 | GET | `/me` | 현재 사용자 정보 |
 | PATCH | `/me/nickname` | 닉네임 변경 |
 
-### 비밀번호 (`/api/password`)
+### 비밀번호 (`/api/v1/password`)
 
 | Method | Endpoint | 설명 |
 |--------|----------|------|
-| POST | `/forgot` | 비밀번호 찾기 요청 |
-| POST | `/verify-code` | 인증 코드 검증 |
-| POST | `/reset` | 비밀번호 재설정 |
-| POST | `/set` | 비밀번호 설정 (소셜 로그인 사용자) |
+| POST | `/set` | 비밀번호 설정 |
 | POST | `/change` | 비밀번호 변경 |
 
-### 소셜 인증 (`/api/auth/social`)
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| POST | `/google/signin` | Google 로그인 |
-| POST | `/google/link` | Google 계정 연동 |
-| DELETE | `/{provider}` | 소셜 계정 연동 해제 |
-| GET | `/linked` | 연동된 소셜 계정 목록 |
-
-### 세션 (`/api/sessions`)
+### 세션 (`/api/v1/sessions`)
 
 | Method | Endpoint | 설명 |
 |--------|----------|------|
 | GET | `/` | 활성 세션 목록 |
 | DELETE | `/{sessionId}` | 특정 세션 종료 |
 | DELETE | `/others` | 다른 세션 모두 종료 |
-
-### 2FA (`/api/auth/2fa`)
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| POST | `/setup` | 2FA 설정 시작 |
-| POST | `/verify` | 2FA 설정 확인 |
-| POST | `/disable` | 2FA 비활성화 |
 
 ## 설정 방법
 
@@ -119,11 +91,6 @@ jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: 900000      # 15분
   refresh-token-expiration: 604800000  # 7일
-
-# Google OAuth
-google:
-  oauth:
-    client-id: ${GOOGLE_CLIENT_ID}
 
 # Rate Limiting
 rate-limit:
@@ -162,10 +129,6 @@ cors:
 - 연속 로그인 실패 시 계정 잠금
 - 잠금 해제 후 실패 횟수 초기화
 
-### 2FA (Two-Factor Authentication)
-- TOTP 기반 2단계 인증
-- Google Authenticator 호환
-
 ## 테스트
 
 ```bash
@@ -197,14 +160,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
-    // Google OAuth
-    implementation("com.google.api-client:google-api-client:2.7.2")
-
     // Rate Limiting
     implementation("com.bucket4j:bucket4j_jdk17-core:8.15.0")
-
-    // 2FA
-    implementation("dev.samstevens.totp:totp:1.7.1")
 
     // Caching
     implementation("org.springframework.boot:spring-boot-starter-cache")

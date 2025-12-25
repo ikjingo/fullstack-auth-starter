@@ -67,12 +67,12 @@ class PasswordServiceTest {
     @DisplayName("setPassword")
     inner class SetPasswordTest {
         @Test
-        fun `OAuth 계정에 비밀번호 설정이 성공해야 한다`() {
+        fun `비밀번호 미설정 계정에 비밀번호 설정이 성공해야 한다`() {
             // Given
             val userId = 1L
             val password = "NewPassword123!"
             val confirmPassword = "NewPassword123!"
-            val user = createUser(id = userId, password = null) // OAuth 계정
+            val user = createUser(id = userId, password = null) // 비밀번호 미설정 계정
             val tokenResponse =
                 TokenResponse(
                     accessToken = "access-token",
@@ -163,7 +163,7 @@ class PasswordServiceTest {
         }
 
         @Test
-        fun `비밀번호가 없는 OAuth 계정에서 변경 시도 시 예외가 발생해야 한다`() {
+        fun `비밀번호가 없는 계정에서 변경 시도 시 예외가 발생해야 한다`() {
             // Given
             val userId = 1L
             val currentPassword = "CurrentPassword123!"

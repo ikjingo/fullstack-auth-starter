@@ -81,25 +81,6 @@ src/main/kotlin/com/zenless/core/api/
 | PASSWORD_ALREADY_SET | 이미 비밀번호 설정됨 |
 | NO_PASSWORD_SET | 비밀번호 미설정 |
 
-### 소셜 로그인 관련
-
-| 에러 타입 | 설명 |
-|----------|------|
-| INVALID_OAUTH_TOKEN | 유효하지 않은 OAuth 토큰 |
-| OAUTH_ACCOUNT_NO_PASSWORD | 소셜 로그인 계정 |
-| SOCIAL_ACCOUNT_ALREADY_LINKED | 이미 연동된 소셜 계정 |
-| SOCIAL_ACCOUNT_NOT_FOUND | 소셜 계정 없음 |
-| CANNOT_UNLINK_ONLY_LOGIN_METHOD | 마지막 로그인 방법 해제 불가 |
-
-### 2FA 관련
-
-| 에러 타입 | 설명 |
-|----------|------|
-| TWO_FACTOR_ALREADY_ENABLED | 2FA 이미 활성화 |
-| TWO_FACTOR_NOT_ENABLED | 2FA 미활성화 |
-| INVALID_TWO_FACTOR_CODE | 잘못된 2FA 코드 |
-| TWO_FACTOR_REQUIRED | 2FA 필요 |
-
 ## 사용 예시
 
 ### 성공 응답 반환

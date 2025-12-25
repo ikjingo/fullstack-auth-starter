@@ -23,14 +23,6 @@ jwt:
   refresh-token-expiration: 604800000
   issuer: zenless-test
 
-# Google OAuth test configuration
-google:
-  client-id: test-google-client-id-for-testing
-
-# Password reset settings
-password-reset:
-  code-expiration-minutes: 10
-
 # Rate limiting settings
 rate-limit:
   auth:
