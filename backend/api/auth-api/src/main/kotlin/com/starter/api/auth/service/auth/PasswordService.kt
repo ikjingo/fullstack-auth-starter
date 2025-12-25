@@ -56,8 +56,7 @@ class PasswordService(
         )
 
         val tokenResponse = authenticationService.generateTokens(user)
-        val linkedProviders = authenticationService.getLinkedProviderNames(user)
-        return AuthResponse.from(user, tokenResponse.accessToken, linkedProviders)
+        return AuthResponse.from(user, tokenResponse.accessToken, tokenResponse.refreshToken)
     }
 
     @Transactional

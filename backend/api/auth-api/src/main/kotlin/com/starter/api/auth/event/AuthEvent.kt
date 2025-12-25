@@ -78,21 +78,3 @@ data class TokenRefreshedEvent(
     val userId: Long,
     val email: String,
 ) : AuthEvent()
-
-/**
- * 소셜 계정 연동 이벤트
- */
-data class SocialAccountLinkedEvent(
-    val userId: Long,
-    val email: String,
-    val provider: String,
-) : AuthEvent()
-
-/**
- * 소셜 계정 연동 해제 이벤트
- */
-data class SocialAccountUnlinkedEvent(
-    val userId: Long,
-    val email: String,
-    val provider: String,
-) : AuthEvent()

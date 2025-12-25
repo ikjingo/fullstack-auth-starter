@@ -15,7 +15,6 @@ class CacheConfig {
         const val CACHE_TOKEN_BLACKLIST = "tokenBlacklist"
         const val CACHE_USERS = "users"
         const val CACHE_USERS_BY_EMAIL = "usersByEmail"
-        const val CACHE_SOCIAL_ACCOUNTS = "socialAccounts"
     }
 
     @Bean
@@ -58,16 +57,6 @@ class CacheConfig {
                 .newBuilder()
                 .maximumSize(10_000)
                 .expireAfterWrite(Duration.ofMinutes(15))
-                .recordStats()
-                .build(),
-        )
-
-        cacheManager.registerCustomCache(
-            CACHE_SOCIAL_ACCOUNTS,
-            Caffeine
-                .newBuilder()
-                .maximumSize(10_000)
-                .expireAfterWrite(Duration.ofHours(1))
                 .recordStats()
                 .build(),
         )

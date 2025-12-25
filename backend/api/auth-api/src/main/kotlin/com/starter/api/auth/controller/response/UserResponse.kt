@@ -11,13 +11,9 @@ data class UserResponse(
     val createdAt: LocalDateTime,
     val hasPassword: Boolean,
     val profileImageUrl: String?,
-    val linkedSocialAccounts: List<String>,
 ) {
     companion object {
-        fun from(
-            user: UserEntity,
-            linkedProviders: List<String> = emptyList(),
-        ): UserResponse =
+        fun from(user: UserEntity): UserResponse =
             UserResponse(
                 id = user.id.toString(),
                 email = user.email,
@@ -26,7 +22,6 @@ data class UserResponse(
                 createdAt = user.createdAt,
                 hasPassword = user.password != null,
                 profileImageUrl = user.profileImageUrl,
-                linkedSocialAccounts = linkedProviders,
             )
     }
 }

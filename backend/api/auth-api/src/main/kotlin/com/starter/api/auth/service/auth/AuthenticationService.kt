@@ -17,7 +17,6 @@ import com.starter.core.api.support.error.CoreApiException
 import com.starter.core.api.support.error.ErrorType
 import com.starter.storage.db.user.RefreshTokenEntity
 import com.starter.storage.db.user.RefreshTokenRepository
-import com.starter.storage.db.user.SocialAccountRepository
 import com.starter.storage.db.user.UserEntity
 import com.starter.storage.db.user.UserRepository
 import com.starter.storage.db.user.UserStatus
@@ -37,7 +36,6 @@ import java.time.LocalDateTime
 @Transactional(readOnly = true)
 class AuthenticationService(
     private val userRepository: UserRepository,
-    private val socialAccountRepository: SocialAccountRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtTokenProvider: JwtTokenProvider,
     private val jwtProperties: JwtProperties,
@@ -88,9 +86,9 @@ class AuthenticationService(
         // 계정 잠금 여부 확인
         loginAttemptService.checkAccountLocked(user)
 
-        // OAuth 전용 계정(비밀번호 미설정)은 비밀번호 로그인 불가
+        // 비밀번호 미설정 계정은 로그인 불가
         if (user.password == null) {
-            throw CoreApiException(ErrorType.OAUTH_ACCOUNT_NO_PASSWORD)
+            throw CoreApiException(ErrorType.INVALID_CREDENTIALS)
         }
 
         if (!passwordEncoder.matches(request.password, user.password)) {
@@ -109,11 +107,9 @@ class AuthenticationService(
         eventPublisher.publishLoginSuccess(user.id, user.email)
 
         val tokenResponse = generateTokens(user)
-        val linkedProviders = getLinkedProviderNames(user)
         return AuthResponse.from(
             user = user,
             token = tokenResponse.accessToken,
-            linkedProviders = linkedProviders,
             refreshToken = tokenResponse.refreshToken,
         )
     }
@@ -171,12 +167,8 @@ class AuthenticationService(
     }
 
     fun getMe(userId: Long): UserResponse {
-        // Fetch Join으로 소셜 계정과 함께 조회 (N+1 방지)
-        val user =
-            userRepository.findByIdWithSocialAccounts(userId)
-                ?: throw CoreApiException(ErrorType.USER_NOT_FOUND)
-        val linkedProviders = user.socialAccounts.map { it.provider.name }
-        return UserResponse.from(user, linkedProviders)
+        val user = findUserByIdOrThrow(userId)
+        return UserResponse.from(user)
     }
 
     @Transactional
@@ -190,11 +182,9 @@ class AuthenticationService(
         log.info("Nickname updated for user: ${user.email}")
 
         val tokenResponse = generateTokens(user)
-        val linkedProviders = getLinkedProviderNames(user)
         return AuthResponse.from(
             user = user,
             token = tokenResponse.accessToken,
-            linkedProviders = linkedProviders,
             refreshToken = tokenResponse.refreshToken,
         )
     }
@@ -244,8 +234,6 @@ class AuthenticationService(
             else -> null
         }
     }
-
-    fun getLinkedProviderNames(user: UserEntity): List<String> = socialAccountRepository.findAllByUser(user).map { it.provider.name }
 
     fun findUserByIdOrThrow(userId: Long): UserEntity =
         userRepository.findById(userId).orElseThrow {

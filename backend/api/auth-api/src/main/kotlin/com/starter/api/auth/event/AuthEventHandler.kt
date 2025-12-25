@@ -134,34 +134,4 @@ class AuthEventHandler {
             event.timestamp,
         )
     }
-
-    /**
-     * 소셜 계정 연동 이벤트 처리
-     */
-    @Async
-    @EventListener
-    fun handleSocialAccountLinked(event: SocialAccountLinkedEvent) {
-        log.info(
-            "[Event] Social account linked: userId={}, email={}, provider={}, timestamp={}",
-            event.userId,
-            event.email,
-            event.provider,
-            event.timestamp,
-        )
-    }
-
-    /**
-     * 소셜 계정 연동 해제 이벤트 처리
-     */
-    @Async
-    @EventListener
-    fun handleSocialAccountUnlinked(event: SocialAccountUnlinkedEvent) {
-        log.info(
-            "[Event] Social account unlinked: userId={}, email={}, provider={}, timestamp={}",
-            event.userId,
-            event.email,
-            event.provider,
-            event.timestamp,
-        )
-    }
 }

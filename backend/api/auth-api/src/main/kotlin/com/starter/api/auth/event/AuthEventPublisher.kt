@@ -97,26 +97,4 @@ class AuthEventPublisher(
     ) {
         publish(TokenRefreshedEvent(userId, email))
     }
-
-    /**
-     * 소셜 계정 연동 이벤트 발행
-     */
-    fun publishSocialAccountLinked(
-        userId: Long,
-        email: String,
-        provider: String,
-    ) {
-        publish(SocialAccountLinkedEvent(userId, email, provider))
-    }
-
-    /**
-     * 소셜 계정 연동 해제 이벤트 발행
-     */
-    fun publishSocialAccountUnlinked(
-        userId: Long,
-        email: String,
-        provider: String,
-    ) {
-        publish(SocialAccountUnlinkedEvent(userId, email, provider))
-    }
 }

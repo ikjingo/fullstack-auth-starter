@@ -11,11 +11,10 @@ data class AuthResponse(
         fun from(
             user: UserEntity,
             token: String,
-            linkedProviders: List<String> = emptyList(),
             refreshToken: String? = null,
         ): AuthResponse =
             AuthResponse(
-                user = AuthUserResponse.from(user, linkedProviders),
+                user = AuthUserResponse.from(user),
                 token = token,
                 refreshToken = refreshToken,
             )
@@ -29,13 +28,9 @@ data class AuthUserResponse(
     val role: String,
     val profileImageUrl: String?,
     val hasPassword: Boolean,
-    val linkedSocialAccounts: List<String>,
 ) {
     companion object {
-        fun from(
-            user: UserEntity,
-            linkedProviders: List<String> = emptyList(),
-        ): AuthUserResponse =
+        fun from(user: UserEntity): AuthUserResponse =
             AuthUserResponse(
                 id = user.id.toString(),
                 email = user.email,
@@ -43,7 +38,6 @@ data class AuthUserResponse(
                 role = user.role.name,
                 profileImageUrl = user.profileImageUrl,
                 hasPassword = user.password != null,
-                linkedSocialAccounts = linkedProviders,
             )
     }
 }

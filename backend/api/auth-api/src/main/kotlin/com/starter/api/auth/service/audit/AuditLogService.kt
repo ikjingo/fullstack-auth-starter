@@ -65,28 +65,6 @@ class AuditLogService {
         )
     }
 
-    fun logSocialAccountLinked(
-        userId: Long,
-        provider: String,
-    ) {
-        log(
-            action = AuditAction.SOCIAL_ACCOUNT_LINKED,
-            userId = userId,
-            details = mapOf("provider" to provider),
-        )
-    }
-
-    fun logSocialAccountUnlinked(
-        userId: Long,
-        provider: String,
-    ) {
-        log(
-            action = AuditAction.SOCIAL_ACCOUNT_UNLINKED,
-            userId = userId,
-            details = mapOf("provider" to provider),
-        )
-    }
-
     fun logAccountLocked(
         userId: Long,
         email: String,
@@ -185,8 +163,6 @@ enum class AuditAction(
     SIGN_UP(AuditLevel.INFO),
     PASSWORD_CHANGE(AuditLevel.INFO),
     PASSWORD_RESET_REQUEST(AuditLevel.INFO),
-    SOCIAL_ACCOUNT_LINKED(AuditLevel.INFO),
-    SOCIAL_ACCOUNT_UNLINKED(AuditLevel.INFO),
     ACCOUNT_LOCKED(AuditLevel.WARN),
     ACCOUNT_UNLOCKED(AuditLevel.INFO),
     TOKEN_REFRESH(AuditLevel.INFO),
