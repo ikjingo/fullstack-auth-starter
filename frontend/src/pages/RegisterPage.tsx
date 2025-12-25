@@ -56,8 +56,34 @@ export function RegisterPage() {
       navigate('/')
     } catch (error) {
       const apiError = toApiError(error)
-      const message = apiError.errorType ? tError(apiError.errorType) : t('common.tryAgain')
-      toast.error(t('register.failed'), message)
+
+      // 서버 validation 에러인 경우 필드별 에러 메시지 표시
+      if (apiError.isValidationError() && apiError.data) {
+        const fieldErrors = apiError.data as Record<string, string>
+        let hasFieldError = false
+
+        // 필드별 에러를 폼에 설정
+        Object.entries(fieldErrors).forEach(([field, message]) => {
+          if (['email', 'password', 'nickname'].includes(field)) {
+            form.setError(field as 'email' | 'password' | 'nickname', {
+              type: 'server',
+              message,
+            })
+            hasFieldError = true
+          }
+        })
+
+        // 필드 에러가 있으면 toast는 간단하게, 없으면 전체 메시지 표시
+        if (hasFieldError) {
+          toast.error(t('register.failed'), t('validation.checkFields'))
+        } else {
+          const message = apiError.errorType ? tError(apiError.errorType) : t('common.tryAgain')
+          toast.error(t('register.failed'), message)
+        }
+      } else {
+        const message = apiError.errorType ? tError(apiError.errorType) : t('common.tryAgain')
+        toast.error(t('register.failed'), message)
+      }
     } finally {
       setIsLoading(false)
     }

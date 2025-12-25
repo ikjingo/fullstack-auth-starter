@@ -2,15 +2,19 @@
  * 공통 비밀번호 스키마
  *
  * 비밀번호 관련 유효성 검증 스키마를 중앙화합니다.
+ * @see backend/api/auth-api/.../validation/StrongPasswordValidator.kt
  */
 import { z } from 'zod'
 
 /**
- * 비밀번호 유효성 검증 정규식
- * - 최소 하나의 영문자
- * - 최소 하나의 숫자
+ * 비밀번호 유효성 검증 정규식 (백엔드와 동기화)
  */
-export const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)/
+export const PASSWORD_PATTERNS = {
+  uppercase: /[A-Z]/,
+  lowercase: /[a-z]/,
+  digit: /[0-9]/,
+  special: /[!@#$%^&*()_+\-=\[\]{}|;':",./<>?`~\\]/,
+} as const
 
 /**
  * 비밀번호 에러 메시지
@@ -18,9 +22,14 @@ export const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d)/
 export const PASSWORD_MESSAGES = {
   required: '비밀번호를 입력해주세요',
   minLength: '비밀번호는 8자 이상이어야 합니다',
-  pattern: '비밀번호는 영문과 숫자를 포함해야 합니다',
+  uppercase: '대문자를 1개 이상 포함해야 합니다',
+  lowercase: '소문자를 1개 이상 포함해야 합니다',
+  digit: '숫자를 1개 이상 포함해야 합니다',
+  special: '특수문자를 1개 이상 포함해야 합니다',
   confirmRequired: '비밀번호 확인을 입력해주세요',
   mismatch: '비밀번호가 일치하지 않습니다',
+  // 레거시 호환성
+  pattern: '비밀번호는 대문자, 소문자, 숫자, 특수문자를 각각 1개 이상 포함해야 합니다',
 } as const
 
 /**
@@ -33,12 +42,24 @@ export const loginPasswordSchema = z
 
 /**
  * 강화된 비밀번호 스키마 (회원가입/변경용 - 패턴 검증 포함)
+ * 백엔드 StrongPasswordValidator와 동일한 검증 규칙 적용
  */
 export const strongPasswordSchema = z
   .string()
   .min(1, PASSWORD_MESSAGES.required)
   .min(8, PASSWORD_MESSAGES.minLength)
-  .regex(PASSWORD_REGEX, PASSWORD_MESSAGES.pattern)
+  .refine((val) => PASSWORD_PATTERNS.uppercase.test(val), {
+    message: PASSWORD_MESSAGES.uppercase,
+  })
+  .refine((val) => PASSWORD_PATTERNS.lowercase.test(val), {
+    message: PASSWORD_MESSAGES.lowercase,
+  })
+  .refine((val) => PASSWORD_PATTERNS.digit.test(val), {
+    message: PASSWORD_MESSAGES.digit,
+  })
+  .refine((val) => PASSWORD_PATTERNS.special.test(val), {
+    message: PASSWORD_MESSAGES.special,
+  })
 
 /**
  * 비밀번호 확인 스키마

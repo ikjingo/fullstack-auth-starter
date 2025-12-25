@@ -172,6 +172,9 @@ export interface TranslationKeys {
     subtitle: string
     backToHome: string
   }
+  validation: {
+    checkFields: string
+  }
   errors: {
     INVALID_REQUEST: string
     DUPLICATE_EMAIL: string

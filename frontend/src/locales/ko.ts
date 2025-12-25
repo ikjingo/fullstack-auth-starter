@@ -171,6 +171,9 @@ export const ko: TranslationKeys = {
     subtitle: '요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.',
     backToHome: '홈으로 돌아가기',
   },
+  validation: {
+    checkFields: '입력 내용을 확인해주세요',
+  },
   errors: {
     // Auth errors
     INVALID_REQUEST: '잘못된 요청입니다.',
