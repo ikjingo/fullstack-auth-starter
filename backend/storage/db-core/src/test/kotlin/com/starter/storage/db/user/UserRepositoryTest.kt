@@ -13,9 +13,6 @@ class UserRepositoryTest : RepositoryTestSupport() {
     @Autowired
     private lateinit var userRepository: UserRepository
 
-    @Autowired
-    private lateinit var socialAccountRepository: SocialAccountRepository
-
     private lateinit var testUser: UserEntity
 
     @BeforeEach
@@ -116,50 +113,6 @@ class UserRepositoryTest : RepositoryTestSupport() {
             // Then
             assertThat(foundSuspended).isNotNull
             assertThat(foundActive).isNull()
-        }
-    }
-
-    @Nested
-    @DisplayName("findByIdWithSocialAccounts")
-    inner class FindByIdWithSocialAccountsTest {
-        @Test
-        fun `사용자와 소셜 계정을 함께 조회할 수 있다`() {
-            // Given
-            val socialAccount =
-                SocialAccountEntity(
-                    user = testUser,
-                    provider = AuthProvider.GOOGLE,
-                    providerId = "google-id-123",
-                )
-            testUser.addSocialAccount(socialAccount)
-            userRepository.saveAndFlush(testUser)
-
-            // When
-            val found = userRepository.findByIdWithSocialAccounts(testUser.id)
-
-            // Then
-            assertThat(found).isNotNull
-            assertThat(found?.socialAccounts).hasSize(1)
-            assertThat(found?.socialAccounts?.first()?.provider).isEqualTo(AuthProvider.GOOGLE)
-        }
-
-        @Test
-        fun `소셜 계정이 없는 사용자도 조회할 수 있다`() {
-            // When
-            val found = userRepository.findByIdWithSocialAccounts(testUser.id)
-
-            // Then
-            assertThat(found).isNotNull
-            assertThat(found?.socialAccounts).isEmpty()
-        }
-
-        @Test
-        fun `존재하지 않는 ID로 조회하면 null을 반환한다`() {
-            // When
-            val found = userRepository.findByIdWithSocialAccounts(999999L)
-
-            // Then
-            assertThat(found).isNull()
         }
     }
 

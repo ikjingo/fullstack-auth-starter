@@ -40,12 +40,4 @@ class UserRepositoryCustomImpl(
                 user.email.eq(email),
                 user.status.eq(status),
             ).fetchOne()
-
-    override fun findByIdWithSocialAccounts(userId: Long): UserEntity? =
-        queryFactory
-            .selectFrom(user)
-            .leftJoin(user.socialAccounts)
-            .fetchJoin()
-            .where(user.id.eq(userId))
-            .fetchOne()
 }
