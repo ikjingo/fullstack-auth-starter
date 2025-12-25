@@ -1,95 +1,158 @@
 # Fullstack Auth Starter - Project Overview
 
-**Last Updated**: 2025-12-25
+## Introduction
 
-## Project Description
-
-Zenless 프로젝트에서 분리된 인증 전용 스타터 템플릿입니다.
-핵심 인증 기능만 포함하여 다른 프로젝트의 기반으로 사용할 수 있습니다.
-
-**GitHub Repository**: https://github.com/ikjingo/fullstack-auth-starter
+Fullstack Auth Starter is a production-ready authentication template project built with modern technologies. It provides a solid foundation for building secure web applications with email/password authentication.
 
 ## Tech Stack
 
 ### Backend
-- Kotlin + Spring Boot 3.5.8 (Java 21)
-- Spring Security + JWT (jjwt 0.13.0)
-- Spring Data JPA + PostgreSQL 16
-- Bucket4j (Rate Limiting)
-- Caffeine Cache
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Kotlin | 1.9+ | Primary language |
+| Spring Boot | 3.5.8 | Application framework |
+| Java | 21 | Runtime |
+| PostgreSQL | 16 | Database |
+| JWT (jjwt) | 0.13.0 | Token authentication |
+| Bucket4j | - | Rate limiting |
+| Flyway | - | Database migration |
 
 ### Frontend
-- React 19 + TypeScript 5 + Vite 7
-- Tailwind CSS + shadcn/ui
-- Zustand (전역 상태) + TanStack Query (서버 상태)
-- React Hook Form + Zod
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React | 19.2.0 | UI framework |
+| TypeScript | 5.9.3 | Type safety |
+| Vite | 7.2.4 | Build tool |
+| Tailwind CSS | 4.1.17 | Styling |
+| Zustand | 5.0.9 | State management |
+| React Query | 5.90.11 | Server state |
+| React Hook Form | 7.67.0 | Form handling |
+| Zod | 4.1.13 | Validation |
 
-### Infrastructure
-- Docker & Docker Compose
-- PostgreSQL 16 (Alpine)
+## Core Features
 
-## Package Structure
+### Authentication
+- Email/password registration and login
+- JWT-based authentication (Access + Refresh tokens)
+- BCrypt password hashing
+- Password strength validation (uppercase, lowercase, digit, special char)
 
-- **Backend**: `com.starter.api.auth`, `com.starter.core`, `com.starter.storage`
-- **Frontend**: 기존 Zenless 구조 유지
+### Security
+- Rate limiting on authentication endpoints
+- Account lockout after failed login attempts
+- Token blacklisting on logout
+- CORS configuration
+- Content Security Policy headers
+- Admin IP whitelist (optional)
 
-## Included Features
+### Session Management
+- Multi-session support (up to 5 concurrent sessions)
+- Session revocation (single or all other sessions)
+- Device/browser info tracking
+- Remember Me functionality
 
-- 회원가입 (이메일/비밀번호)
-- 로그인/로그아웃
-- JWT 인증 (Access + Refresh Token)
-- 세션 관리 (다중 세션 제어)
-- Remember Me 기능
-- 비밀번호 변경/설정
-- Rate Limiting
-- 계정 잠금 (연속 로그인 실패 시)
+### User Management
+- Nickname management
+- Password set/change
+- User profile retrieval
 
-## Excluded Features (Intentionally Removed)
+## Intentionally Excluded Features
 
-- Google OAuth 소셜 로그인
-- 2FA (Two-Factor Authentication)
-- 이메일 기반 비밀번호 재설정
+This template focuses on core authentication only. The following features are intentionally excluded:
 
-## API Endpoints
+- OAuth/Social login (Google, etc.)
+- Two-Factor Authentication (2FA)
+- Email-based password reset
+- Email verification
 
-### 인증 (`/api/v1/auth`)
-- `POST /signup` - 회원가입
-- `POST /signin` - 로그인
-- `POST /signout` - 로그아웃
-- `POST /refresh` - 토큰 갱신
-- `GET /me` - 현재 사용자 정보
-- `PATCH /me/nickname` - 닉네임 변경
+## Project Structure
 
-### 비밀번호 (`/api/v1/password`)
-- `POST /set` - 비밀번호 설정
-- `POST /change` - 비밀번호 변경
-
-### 세션 (`/api/v1/sessions`)
-- `GET /` - 활성 세션 목록
-- `DELETE /{sessionId}` - 특정 세션 종료
-- `DELETE /others` - 다른 세션 모두 종료
-
-## Development Commands
-
-```bash
-# PostgreSQL 시작
-docker compose -f docker-compose.dev.yml up -d
-
-# Backend 실행
-cd backend && ./gradlew :api:app-api:bootRun
-
-# Frontend 실행
-cd frontend && npm run dev
-
-# 빌드
-cd backend && ./gradlew build
-cd frontend && npm run build
+```
+fullstack-auth-starter/
+├── backend/                    # Kotlin Spring Boot multi-module API
+│   ├── api/
+│   │   ├── app-api/           # Main application (integrates all APIs)
+│   │   └── auth-api/          # Authentication API module
+│   ├── core/
+│   │   ├── core-api/          # Common API utilities
+│   │   └── core-domain/       # Domain models
+│   └── storage/
+│       └── db-core/           # JPA entities & repositories
+│
+├── frontend/                   # React TypeScript SPA
+│   └── src/
+│       ├── api/               # API client & integration
+│       ├── components/        # UI components
+│       ├── pages/             # Page components
+│       ├── hooks/             # Custom hooks
+│       ├── stores/            # Zustand stores
+│       ├── schemas/           # Zod validation schemas
+│       └── locales/           # i18n translations
+│
+├── docker-compose.yml         # Full stack deployment
+├── docker-compose.dev.yml     # Development database only
+└── CLAUDE.md                  # AI assistant guidelines
 ```
 
-## Key Decisions
+## Database Schema
 
-1. **패키지명 변경**: `com.zenless` → `com.starter`
-2. **인증 방식**: JWT 기반 (Access + Refresh Token)
-3. **소셜 로그인 제외**: 핵심 인증만 포함하여 단순화
-4. **2FA 제외**: 복잡도 감소, 필요시 별도 추가 가능
-5. **비밀번호 재설정 제외**: 이메일 서비스 의존성 제거
+### Tables
+
+**users**
+- `id` (PK) - Auto-generated ID
+- `email` (UNIQUE) - User email address
+- `password` - BCrypt hashed password (nullable)
+- `nickname` - Display name
+- `role` - USER or ADMIN
+- `status` - ACTIVE, INACTIVE, or SUSPENDED
+- `failedLoginAttempts` - For account lockout
+- `lockoutUntil` - Lockout expiration timestamp
+
+**refresh_tokens**
+- `id` (PK) - Token ID
+- `user_id` (FK) - Reference to users
+- `token` (UNIQUE) - JWT refresh token
+- `expiresAt` - Token expiration
+- `revoked` - Whether token is revoked
+- `userAgent`, `ipAddress`, `deviceInfo` - Session metadata
+
+**token_blacklist**
+- `id` (PK) - Entry ID
+- `token` (UNIQUE) - Blacklisted JWT
+- `expiresAt` - When entry can be cleaned up
+
+## Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- JDK 21+
+- Node.js 18+
+
+### Running the Project
+
+```bash
+# Start PostgreSQL database
+docker compose -f docker-compose.dev.yml up -d
+
+# Start backend (terminal 1)
+cd backend
+./gradlew :api:app-api:bootRun
+
+# Start frontend (terminal 2)
+cd frontend
+npm install
+npm run dev
+```
+
+### Access Points
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+
+## Documentation Index
+
+- [Architecture Guide](./architecture.md)
+- [Backend Development Guide](./backend-guide.md)
+- [Frontend Development Guide](./frontend-guide.md)
+- [API Reference](./api-reference.md)
+- [Development Setup](./development-setup.md)
