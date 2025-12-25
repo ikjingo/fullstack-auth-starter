@@ -53,25 +53,10 @@ export const AuthErrorType = {
  * 비밀번호 관련 에러
  */
 export const PasswordErrorType = {
-  INVALID_RESET_CODE: 'INVALID_RESET_CODE',
-  CODE_NOT_VERIFIED: 'CODE_NOT_VERIFIED',
   PASSWORD_MISMATCH: 'PASSWORD_MISMATCH',
   PASSWORD_ALREADY_SET: 'PASSWORD_ALREADY_SET',
   NO_PASSWORD_SET: 'NO_PASSWORD_SET',
   INVALID_CURRENT_PASSWORD: 'INVALID_CURRENT_PASSWORD',
-} as const
-
-/**
- * 소셜 로그인 관련 에러
- */
-export const SocialAuthErrorType = {
-  INVALID_OAUTH_TOKEN: 'INVALID_OAUTH_TOKEN',
-  OAUTH_ACCOUNT_NO_PASSWORD: 'OAUTH_ACCOUNT_NO_PASSWORD',
-  SOCIAL_ACCOUNT_ALREADY_LINKED: 'SOCIAL_ACCOUNT_ALREADY_LINKED',
-  SOCIAL_PROVIDER_ALREADY_LINKED: 'SOCIAL_PROVIDER_ALREADY_LINKED',
-  SOCIAL_ACCOUNT_NOT_FOUND: 'SOCIAL_ACCOUNT_NOT_FOUND',
-  SOCIAL_ACCOUNT_NOT_LINKED: 'SOCIAL_ACCOUNT_NOT_LINKED',
-  CANNOT_UNLINK_ONLY_LOGIN_METHOD: 'CANNOT_UNLINK_ONLY_LOGIN_METHOD',
 } as const
 
 /**
@@ -90,17 +75,6 @@ export const RateLimitErrorType = {
 } as const
 
 /**
- * 2차 인증(2FA) 관련 에러
- */
-export const TwoFactorErrorType = {
-  TWO_FACTOR_ALREADY_ENABLED: 'TWO_FACTOR_ALREADY_ENABLED',
-  TWO_FACTOR_NOT_ENABLED: 'TWO_FACTOR_NOT_ENABLED',
-  TWO_FACTOR_NOT_INITIATED: 'TWO_FACTOR_NOT_INITIATED',
-  INVALID_TWO_FACTOR_CODE: 'INVALID_TWO_FACTOR_CODE',
-  TWO_FACTOR_REQUIRED: 'TWO_FACTOR_REQUIRED',
-} as const
-
-/**
  * 프론트엔드 전용 에러 (네트워크, 클라이언트 에러)
  */
 export const ClientErrorType = {
@@ -116,10 +90,8 @@ export const ErrorType = {
   ...CommonErrorType,
   ...AuthErrorType,
   ...PasswordErrorType,
-  ...SocialAuthErrorType,
   ...ApiTokenErrorType,
   ...RateLimitErrorType,
-  ...TwoFactorErrorType,
   ...ClientErrorType,
 } as const
 
@@ -132,14 +104,10 @@ export type AuthErrorTypeValue =
   (typeof AuthErrorType)[keyof typeof AuthErrorType]
 export type PasswordErrorTypeValue =
   (typeof PasswordErrorType)[keyof typeof PasswordErrorType]
-export type SocialAuthErrorTypeValue =
-  (typeof SocialAuthErrorType)[keyof typeof SocialAuthErrorType]
 export type ApiTokenErrorTypeValue =
   (typeof ApiTokenErrorType)[keyof typeof ApiTokenErrorType]
 export type RateLimitErrorTypeValue =
   (typeof RateLimitErrorType)[keyof typeof RateLimitErrorType]
-export type TwoFactorErrorTypeValue =
-  (typeof TwoFactorErrorType)[keyof typeof TwoFactorErrorType]
 export type ClientErrorTypeValue =
   (typeof ClientErrorType)[keyof typeof ClientErrorType]
 

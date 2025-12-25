@@ -83,33 +83,6 @@ class RateLimitFilterTest {
             verify { rateLimitService.tryConsume(any()) }
         }
 
-        @Test
-        fun `POST password forgot 요청이 Rate Limit 대상이어야 한다`() {
-            // Given
-            request.method = "POST"
-            request.requestURI = "/api/v1/password/forgot"
-            every { rateLimitService.tryConsume(any()) } returns true
-
-            // When
-            filter.doFilter(request, response, filterChain)
-
-            // Then
-            verify { rateLimitService.tryConsume(any()) }
-        }
-
-        @Test
-        fun `POST 2fa verify 요청이 Rate Limit 대상이어야 한다`() {
-            // Given
-            request.method = "POST"
-            request.requestURI = "/api/v1/auth/2fa/verify"
-            every { rateLimitService.tryConsume(any()) } returns true
-
-            // When
-            filter.doFilter(request, response, filterChain)
-
-            // Then
-            verify { rateLimitService.tryConsume(any()) }
-        }
     }
 
     @Nested

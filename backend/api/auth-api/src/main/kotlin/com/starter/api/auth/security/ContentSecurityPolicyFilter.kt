@@ -17,11 +17,11 @@ class ContentSecurityPolicyFilter : OncePerRequestFilter() {
         private val CSP_POLICY =
             listOf(
                 "default-src 'self'",
-                "script-src 'self' https://accounts.google.com",
+                "script-src 'self'",
                 "style-src 'self' 'unsafe-inline'",
                 "img-src 'self' data: https:",
                 "font-src 'self'",
-                "connect-src 'self' https://accounts.google.com",
+                "connect-src 'self'",
                 "frame-ancestors 'none'",
                 "base-uri 'self'",
                 "form-action 'self'",

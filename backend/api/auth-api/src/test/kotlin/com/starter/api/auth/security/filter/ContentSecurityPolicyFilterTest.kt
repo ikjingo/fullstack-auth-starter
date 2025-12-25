@@ -51,13 +51,13 @@ class ContentSecurityPolicyFilterTest {
         }
 
         @Test
-        fun `script-src에 Google accounts가 허용되어야 한다`() {
+        fun `script-src가 self로 설정되어야 한다`() {
             // When
             filter.doFilter(request, response, filterChain)
 
             // Then
             val cspHeader = response.getHeader("Content-Security-Policy")
-            assertThat(cspHeader).contains("script-src 'self' https://accounts.google.com")
+            assertThat(cspHeader).contains("script-src 'self'")
         }
 
         @Test
@@ -91,13 +91,13 @@ class ContentSecurityPolicyFilterTest {
         }
 
         @Test
-        fun `connect-src에 Google accounts가 허용되어야 한다`() {
+        fun `connect-src가 self로 설정되어야 한다`() {
             // When
             filter.doFilter(request, response, filterChain)
 
             // Then
             val cspHeader = response.getHeader("Content-Security-Policy")
-            assertThat(cspHeader).contains("connect-src 'self' https://accounts.google.com")
+            assertThat(cspHeader).contains("connect-src 'self'")
         }
 
         @Test

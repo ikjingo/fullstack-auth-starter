@@ -20,10 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter
  * - POST /api/v1/auth/signin       - 로그인 시도
  * - POST /api/v1/auth/signup       - 회원가입
  * - POST /api/v1/auth/refresh      - 토큰 갱신
- * - POST /api/v1/password/forgot   - 비밀번호 재설정 요청
- * - POST /api/v1/password/verify   - 인증코드 검증 (6자리 코드 브루트포스 방지)
- * - POST /api/v1/password/reset    - 비밀번호 재설정
- * - POST /api/v1/auth/2fa/verify   - 2FA 코드 검증 (6자리 TOTP 브루트포스 방지)
  */
 @Component
 class RateLimitFilter(
@@ -35,16 +31,9 @@ class RateLimitFilter(
     companion object {
         private val RATE_LIMITED_PATHS =
             setOf(
-                // 인증 관련
                 "/api/v1/auth/signin",
                 "/api/v1/auth/signup",
                 "/api/v1/auth/refresh",
-                // 비밀번호 재설정 (브루트포스 방지)
-                "/api/v1/password/forgot",
-                "/api/v1/password/verify",
-                "/api/v1/password/reset",
-                // 2FA 검증 (6자리 TOTP 브루트포스 방지)
-                "/api/v1/auth/2fa/verify",
             )
         private const val HEADER_RATE_LIMIT_REMAINING = "X-RateLimit-Remaining"
         private const val HEADER_RATE_LIMIT_LIMIT = "X-RateLimit-Limit"
