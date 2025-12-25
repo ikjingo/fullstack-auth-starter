@@ -4,35 +4,57 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Project Overview
 
-Fullstack Auth Starter is a production-ready authentication starter template with:
+Fullstack Auth Starter is a monorepo authentication template project with:
 - **Backend**: Kotlin + Spring Boot 3.5.8 (Java 21)
 - **Frontend**: React 19 + TypeScript + Vite
 - **Database**: PostgreSQL 16
+
+This project provides core authentication features only (no OAuth, no 2FA).
 
 ## Project Structure
 
 ```
 fullstack-auth-starter/
-├── backend/                    # Kotlin Spring Boot multi-module API
-│   ├── api/                    # API modules
-│   │   ├── app-api/            # Main application (integrates all APIs)
-│   │   └── auth-api/           # Authentication API
-│   ├── core/                   # Core modules
-│   │   ├── core-api/           # Common API utilities
-│   │   └── core-domain/        # Domain models
-│   ├── storage/                # Storage modules
-│   │   └── db-core/            # JPA entities and repositories
+├── backend/                    # Kotlin Spring Boot 멀티모듈 API
+│   ├── api/                    # API 모듈
+│   │   ├── app-api/            # 메인 애플리케이션 (모든 API 통합)
+│   │   ├── auth-api/           # 인증 API
+│   │   ├── nickname-api/       # 닉네임 API
+│   │   └── admin-api/          # 관리자 API
+│   ├── core/                   # 핵심 모듈
+│   │   ├── core-api/           # 공통 API 유틸리티
+│   │   └── core-domain/        # 도메인 모델
+│   ├── storage/                # 저장소 모듈
+│   │   └── db-core/            # JPA 엔티티 및 리포지토리
 │   ├── build.gradle.kts
 │   └── gradlew
 ├── frontend/                   # React TypeScript SPA
 │   ├── src/
 │   ├── package.json
-│   └── vite.config.ts
-├── docker-compose.yml          # Full stack (PostgreSQL + Backend + Frontend)
-└── docker-compose.dev.yml      # PostgreSQL only for local development
+│   ├── vite.config.ts
+│   └── nginx.conf
+├── docker-compose.yml          # Full stack (postgres + backend + frontend)
+├── docker-compose.dev.yml      # PostgreSQL only for local dev
+└── dev/                        # 개발 문서
 ```
 
-> **Important**: When running the backend, use the `app-api` module. This module integrates all API modules.
+> **중요**: 백엔드 실행 시 `app-api` 모듈을 사용합니다. 이 모듈이 모든 API 모듈을 통합합니다.
+
+## Included Features
+
+- 회원가입 (이메일/비밀번호)
+- 로그인/로그아웃
+- JWT 인증 (Access + Refresh Token)
+- 세션 관리 (다중 세션 제어, Remember Me)
+- 비밀번호 변경/설정
+- Rate Limiting
+- 계정 잠금 (연속 로그인 실패 시)
+
+## Excluded Features (Intentionally Removed)
+
+- ❌ Google OAuth 소셜 로그인
+- ❌ 2FA (Two-Factor Authentication)
+- ❌ 이메일 기반 비밀번호 재설정
 
 ## Development Commands
 
@@ -46,9 +68,6 @@ docker compose up -d
 
 # Stop all services
 docker compose down
-
-# Rebuild and start
-docker compose up -d --build
 ```
 
 ### Backend (Kotlin + Spring Boot)
@@ -66,7 +85,6 @@ cd frontend
 npm run dev            # Run development server (Vite)
 npm run build          # Build for production
 npm run lint           # Run ESLint
-npm run preview        # Preview production build
 ```
 
 ## Database
@@ -74,157 +92,55 @@ npm run preview        # Preview production build
 ### Connection Info
 - **Host**: localhost
 - **Port**: 5432
-- **Database**: auth_starter
-- **Username**: starter
-- **Password**: starter123
-
-### JDBC URL
-```
-jdbc:postgresql://localhost:5432/auth_starter
-```
+- **Database**: zenless
+- **Username**: zenless
+- **Password**: zenless123
 
 ## Tech Stack
 
 ### Backend
 - Kotlin 1.9+
 - Spring Boot 3.5.8
-- Spring Web MVC
-- Spring Data JPA
-- Spring Security
-- PostgreSQL 16
-- Flyway (Database migrations)
-- JWT (JSON Web Token)
-- Spring Validation
-- Spring Actuator
+- Spring Data JPA + PostgreSQL 16
+- JWT (jjwt 0.13.0)
+- Bucket4j (Rate Limiting)
+- Caffeine Cache
 
 ### Frontend
-- React 19
-- TypeScript 5
-- Vite 7
-- Tailwind CSS
-- shadcn/ui
-- Zustand (State management)
-- TanStack Query (Server state)
-- React Hook Form + Zod (Validation)
-- lucide-react (Icons)
-- ESLint
-- Nginx (Production)
+- React 19 + TypeScript 5 + Vite 7
+- Tailwind CSS + shadcn/ui
+- Zustand + TanStack Query
+- React Hook Form + Zod
 
-### Infrastructure
-- Docker & Docker Compose
-- PostgreSQL 16 (Alpine)
-- Eclipse Temurin JDK 21
-- Node.js 20 (Alpine)
+## Package Structure
 
-## API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | User registration |
-| POST | `/api/auth/login` | User login |
-| POST | `/api/auth/refresh` | Refresh access token |
-| GET | `/api/auth/me` | Get current user info |
-| PUT | `/api/auth/password` | Change password |
-| POST | `/api/auth/logout` | User logout |
-
-### Sessions
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/sessions` | Get active sessions |
-| DELETE | `/api/sessions/{id}` | Terminate specific session |
-| DELETE | `/api/sessions` | Terminate all sessions |
+- **Backend**: `com.starter.api.auth`, `com.starter.core`, `com.starter.storage`
 
 ## Conventions
 
 ### Git Commit Messages
-- Write commit messages in Korean
-- Format: `[type] [area] description`
-- Types:
-  - `[feature]` - New feature
-  - `[fix]` - Bug fix
-  - `[docs]` - Documentation changes
-  - `[refactor]` - Code refactoring
-  - `[test]` - Test additions/modifications
-  - `[chore]` - Build, configuration, and other changes
-- Areas:
-  - `[BE]` - Backend (Kotlin/Spring Boot)
-  - `[FE]` - Frontend (React/TypeScript)
-  - `[INFRA]` - Infrastructure (Docker, Gradle, npm, etc.)
-  - `[FULL]` - Fullstack (Both frontend and backend)
+- 형식: `[타입] [영역] 설명`
+- 타입: `[feature]`, `[fix]`, `[docs]`, `[refactor]`, `[test]`, `[chore]`
+- 영역: `[BE]`, `[FE]`, `[INFRA]`, `[FULL]`
 
 ### Pull Request
-- PR titles follow the same format as commit messages: `[type] description`
-- PR body structure:
-  ```markdown
-  ## Summary
-  - Summary of changes (bullet points)
+- PR 제목: `[타입] [영역] 설명`
+- Squash merge 사용
 
-  ## Test plan
-  - [ ] Test checklist items
+## API Endpoints
 
-  🤖 Generated with [Claude Code](https://claude.com/claude-code)
-  ```
-- Use squash merge for PRs
+### 인증 (`/api/v1/auth`)
+- `POST /signup` - 회원가입
+- `POST /signin` - 로그인
+- `POST /signout` - 로그아웃
+- `POST /refresh` - 토큰 갱신
+- `GET /me` - 현재 사용자 정보
 
-## Environment Variables
+### 비밀번호 (`/api/v1/password`)
+- `POST /set` - 비밀번호 설정
+- `POST /change` - 비밀번호 변경
 
-### Backend
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `jdbc:postgresql://localhost:5432/auth_starter` | Database URL |
-| `DATABASE_USERNAME` | `starter` | Database username |
-| `DATABASE_PASSWORD` | `starter123` | Database password |
-| `SERVER_PORT` | `8080` | Server port |
-| `JWT_SECRET` | (required) | JWT signing secret |
-| `JWT_EXPIRATION` | `3600000` | Access token expiration (ms) |
-| `JWT_REFRESH_EXPIRATION` | `604800000` | Refresh token expiration (ms) |
-
-### Frontend
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `VITE_API_URL` | `/api` | API base URL |
-| `VITE_APP_NAME` | `Auth Starter` | Application name |
-
-## Architecture
-
-### Backend Multi-Module Structure
-
-```
-backend/
-├── api/
-│   ├── app-api/         # Main entry point, integrates all APIs
-│   └── auth-api/        # Authentication domain (controllers, services, security)
-├── core/
-│   ├── core-api/        # Common API utilities (exceptions, responses)
-│   └── core-domain/     # Domain models (if needed)
-└── storage/
-    └── db-core/         # JPA entities, repositories, migrations
-```
-
-### Frontend Structure
-
-```
-frontend/src/
-├── api/           # API client (axios instances, endpoints)
-├── components/    # Reusable components (ui, common, layout)
-├── hooks/         # Custom hooks (auth, etc.)
-├── pages/         # Page components (PascalCase)
-├── schemas/       # Zod schemas for validation
-├── stores/        # Zustand stores
-├── locales/       # i18n translations
-└── lib/           # Utilities
-```
-
-## Security Features
-
-- JWT-based authentication (Access Token + Refresh Token)
-- Password hashing with BCrypt
-- Account lockout after failed login attempts
-- Rate limiting on sensitive endpoints
-- Token blacklisting on logout
-- Session management (multiple device support)
+### 세션 (`/api/v1/sessions`)
+- `GET /` - 활성 세션 목록
+- `DELETE /{sessionId}` - 특정 세션 종료
+- `DELETE /others` - 다른 세션 모두 종료

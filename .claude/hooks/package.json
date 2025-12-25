@@ -1,0 +1,16 @@
+{
+    "name": "zenless-claude-hooks",
+    "version": "1.0.0",
+    "description": "Claude Code 스킬 자동 활성화를 위한 TypeScript 훅",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "check": "tsc --noEmit",
+        "test:activation": "echo '{\"prompt\": \"백엔드 테스트 작성해줘\"}' | npx tsx skill-activation-prompt.ts"
+    },
+    "dependencies": {
+        "@types/node": "^20.11.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3"
+    }
+}

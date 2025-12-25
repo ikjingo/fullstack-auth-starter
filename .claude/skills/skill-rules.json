@@ -1,0 +1,323 @@
+{
+    "version": "1.0",
+    "description": "Zenless 프로젝트의 스킬 자동 활성화 규칙. 프롬프트 또는 파일 컨텍스트에 따라 스킬을 자동 제안합니다.",
+    "skills": {
+        "backend-test-generator": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Kotlin/Spring Boot 백엔드 테스트 코드 생성",
+            "promptTriggers": {
+                "keywords": [
+                    "백엔드 테스트",
+                    "서비스 테스트",
+                    "컨트롤러 테스트",
+                    "junit",
+                    "mockk",
+                    "테스트 작성",
+                    "테스트 만들",
+                    "테스트 추가",
+                    "단위 테스트",
+                    "통합 테스트",
+                    "unit test",
+                    "integration test"
+                ],
+                "intentPatterns": [
+                    "(테스트|test).*(작성|만들|추가|생성)",
+                    "(controller|service|repository).*(test|테스트)",
+                    "(junit|mockk|kotest).*사용"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/*Test.kt",
+                    "backend/**/*Tests.kt",
+                    "backend/**/test/**/*.kt"
+                ]
+            }
+        },
+        "refactor-code": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "백엔드/프론트엔드 코드 리팩토링",
+            "promptTriggers": {
+                "keywords": [
+                    "리팩토링",
+                    "리펙토링",
+                    "refactor",
+                    "코드 개선",
+                    "코드 정리",
+                    "품질 개선",
+                    "클린 코드",
+                    "구조 개선",
+                    "중복 제거",
+                    "최적화"
+                ],
+                "intentPatterns": [
+                    "(리팩토링|refactor|개선|정리).*(코드|구조|클래스|함수)",
+                    "(중복|반복).*(제거|정리)",
+                    "코드.*(깔끔|정돈|개선)"
+                ]
+            }
+        },
+        "pr-workflow": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "커밋, PR 생성, 코드 리뷰, 머지 워크플로우 자동화",
+            "promptTriggers": {
+                "keywords": [
+                    "pr 만들",
+                    "pr 올려",
+                    "pr 생성",
+                    "pull request",
+                    "머지",
+                    "merge",
+                    "pr 마무리",
+                    "pr 완료",
+                    "브랜치 머지"
+                ],
+                "intentPatterns": [
+                    "pr.*(만들|올려|생성|띄워)",
+                    "(커밋|commit).*(하고|후).*(pr|머지)",
+                    "(리뷰|review).*(받|요청)"
+                ]
+            }
+        },
+        "start-project": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Zenless 프로젝트 개발 환경 시작",
+            "promptTriggers": {
+                "keywords": [
+                    "프로젝트 시작",
+                    "서버 시작",
+                    "개발 환경 시작",
+                    "서버 실행",
+                    "서버 켜",
+                    "서버 띄워",
+                    "docker up",
+                    "개발 시작"
+                ],
+                "intentPatterns": [
+                    "(프로젝트|서버|개발).*(시작|실행|켜|띄워)",
+                    "docker.*(up|start)",
+                    "(백엔드|프론트).*(시작|실행)"
+                ]
+            }
+        },
+        "stop-project": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Zenless 프로젝트 개발 환경 중지",
+            "promptTriggers": {
+                "keywords": [
+                    "프로젝트 중지",
+                    "서버 중지",
+                    "개발 환경 중지",
+                    "서버 종료",
+                    "서버 끄",
+                    "서버 내려",
+                    "docker down",
+                    "개발 중지"
+                ],
+                "intentPatterns": [
+                    "(프로젝트|서버|개발).*(중지|종료|끄|내려|멈춰)",
+                    "docker.*(down|stop)"
+                ]
+            }
+        },
+        "git-commit-helper": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "Git diff 분석 기반 커밋 메시지 생성",
+            "promptTriggers": {
+                "keywords": [
+                    "커밋 메시지",
+                    "commit message",
+                    "git commit",
+                    "커밋 작성",
+                    "커밋해",
+                    "커밋 해줘",
+                    "변경 커밋"
+                ],
+                "intentPatterns": [
+                    "커밋.*(메시지|작성|해)",
+                    "(변경|수정).*(커밋|commit)"
+                ]
+            }
+        },
+        "webapp-testing": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Playwright 기반 웹앱 테스트 및 스크린샷",
+            "promptTriggers": {
+                "keywords": [
+                    "playwright",
+                    "브라우저 테스트",
+                    "e2e 테스트",
+                    "스크린샷",
+                    "웹 테스트",
+                    "ui 테스트",
+                    "화면 테스트",
+                    "화면 확인",
+                    "페이지 확인",
+                    "화면 캡처"
+                ],
+                "intentPatterns": [
+                    "(브라우저|화면|페이지).*(테스트|확인|캡처)",
+                    "스크린샷.*(찍|촬영|저장)",
+                    "e2e.*(테스트|검증)"
+                ]
+            }
+        },
+        "artifacts-builder": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "React/Tailwind/shadcn 기반 HTML 아티팩트 생성",
+            "promptTriggers": {
+                "keywords": [
+                    "artifact",
+                    "아티팩트",
+                    "html artifact",
+                    "컴포넌트 미리보기",
+                    "미리보기 만들",
+                    "프리뷰",
+                    "인터랙티브 html"
+                ],
+                "intentPatterns": [
+                    "아티팩트.*(만들|생성|빌드)",
+                    "(컴포넌트|ui).*(미리보기|프리뷰)"
+                ]
+            }
+        },
+        "docx": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "Word 문서(.docx) 생성 및 편집",
+            "promptTriggers": {
+                "keywords": [
+                    "docx",
+                    "워드 문서",
+                    "word document",
+                    "문서 생성",
+                    "문서 만들",
+                    ".docx",
+                    "워드 파일"
+                ],
+                "intentPatterns": [
+                    "(워드|word|docx).*(문서|파일).*(생성|만들|작성)",
+                    "문서.*(내보내|export)"
+                ]
+            }
+        },
+        "frontend-dev-guidelines": {
+            "type": "guardrail",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "React/TypeScript/Tailwind 프론트엔드 개발 가이드라인",
+            "promptTriggers": {
+                "keywords": [
+                    "프론트엔드 개발",
+                    "프론트 구현",
+                    "react 구현",
+                    "컴포넌트 만들",
+                    "ui 구현",
+                    "페이지 만들",
+                    "tailwind",
+                    "화면 개발",
+                    "뷰 만들",
+                    "폼 만들"
+                ],
+                "intentPatterns": [
+                    "(프론트|frontend|react).*(개발|구현|만들)",
+                    "(컴포넌트|component|페이지|page).*(만들|생성|추가)",
+                    "(ui|화면|뷰|폼).*(구현|만들|개발)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "frontend/src/**/*.tsx",
+                    "frontend/src/**/*.ts"
+                ],
+                "pathExclusions": [
+                    "**/*.test.tsx",
+                    "**/*.test.ts",
+                    "**/vite.config.ts"
+                ]
+            }
+        },
+        "backend-dev-guidelines": {
+            "type": "guardrail",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Kotlin/Spring Boot 백엔드 개발 가이드라인",
+            "promptTriggers": {
+                "keywords": [
+                    "백엔드 개발",
+                    "백엔드 구현",
+                    "api 구현",
+                    "api 만들",
+                    "컨트롤러 만들",
+                    "서비스 구현",
+                    "엔드포인트",
+                    "rest api",
+                    "dto 만들",
+                    "entity 만들"
+                ],
+                "intentPatterns": [
+                    "(백엔드|backend|api).*(개발|구현|만들)",
+                    "(컨트롤러|controller|서비스|service).*(만들|생성|추가)",
+                    "(dto|entity|repository).*(만들|생성)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/*.kt"
+                ],
+                "pathExclusions": [
+                    "**/*Test.kt",
+                    "**/*Tests.kt"
+                ]
+            }
+        },
+        "skill-creator": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "low",
+            "description": "새로운 Claude Code 스킬 생성 가이드",
+            "promptTriggers": {
+                "keywords": [
+                    "스킬 만들",
+                    "스킬 생성",
+                    "skill 만들",
+                    "새 스킬",
+                    "스킬 추가"
+                ],
+                "intentPatterns": [
+                    "(스킬|skill).*(만들|생성|추가|개발)"
+                ]
+            }
+        }
+    },
+    "notes": {
+        "enforcement_types": {
+            "suggest": "스킬 제안이 표시되지만 실행을 차단하지 않음",
+            "block": "스킬 사용 후에만 진행 가능 (guardrail)",
+            "warn": "경고를 표시하지만 진행 허용"
+        },
+        "priority_levels": {
+            "critical": "최우선 - 매칭 시 항상 트리거",
+            "high": "중요 - 대부분의 매칭에서 트리거",
+            "medium": "보통 - 명확한 매칭에서만 트리거",
+            "low": "선택적 - 명시적 매칭에서만 트리거"
+        }
+    }
+}
