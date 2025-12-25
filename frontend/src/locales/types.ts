@@ -64,7 +64,6 @@ export interface TranslationKeys {
     title: string
     role: string
     accountManagement: string
-    favorites: string
     accountInfo: string
     passwordNotSet: string
     passwordSet: string
@@ -83,15 +82,12 @@ export interface TranslationKeys {
     loginRequired: string
     loginRequiredMessage: string
     goToLogin: string
-    noFavorites: string
     passwordSetButton: string
     passwordChangeButton: string
   }
   header: {
     nav: {
       home: string
-      nickname: string
-      generator: string
       myPage: string
     }
     menu: string
@@ -105,48 +101,6 @@ export interface TranslationKeys {
     admin: string
     components: string
   }
-  home: {
-    noNicknames: string
-    collectNicknamesHint: string
-  }
-  nickname: {
-    tabs: {
-      all: string
-      lostArk: string
-      mapleStory: string
-      dictionary: string
-    }
-    filters: {
-      game: string
-      rarity: string
-      search: string
-      all: string
-      gameAll: string
-      rarityAll: string
-      selectGame: string
-      selectRarity: string
-      searchPlaceholder: string
-      clearAll: string
-      gameModeOrTooltip: string
-      gameModeAndTooltip: string
-    }
-    table: {
-      nickname: string
-      game: string
-      rarity: string
-      updatedAt: string
-      server: string
-      class: string
-      itemLevel: string
-      world: string
-      job: string
-      combatPower: string
-      noResults: string
-      noResultsDescription: string
-      caption: string
-    }
-    loadMore: string
-  }
   nav: {
     mypage: string
   }
@@ -158,14 +112,6 @@ export interface TranslationKeys {
     myPage: string
     termsOfService: string
     privacyPolicy: string
-  }
-  generator: {
-    title: string
-    subtitle: string
-    generate: string
-    copy: string
-    copied: string
-    disclaimer: string
   }
   notFound: {
     title: string
