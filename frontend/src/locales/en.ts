@@ -171,6 +171,9 @@ export const en: TranslationKeys = {
     subtitle: 'The page you requested does not exist or may have been moved.',
     backToHome: 'Back to Home',
   },
+  validation: {
+    checkFields: 'Please check your input',
+  },
   errors: {
     INVALID_REQUEST: 'Invalid request.',
     DUPLICATE_EMAIL: 'Email is already in use.',
