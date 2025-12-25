@@ -235,7 +235,6 @@ class AuthControllerTest : ControllerTestSupport() {
                     createdAt = LocalDateTime.now(),
                     hasPassword = true,
                     profileImageUrl = null,
-                    linkedSocialAccounts = emptyList(),
                 )
 
             every { authService.getMe(testUserId) } returns response
@@ -280,7 +279,6 @@ class AuthControllerTest : ControllerTestSupport() {
                     role = "USER",
                     profileImageUrl = null,
                     hasPassword = true,
-                    linkedSocialAccounts = emptyList(),
                 ),
             token = token,
         )

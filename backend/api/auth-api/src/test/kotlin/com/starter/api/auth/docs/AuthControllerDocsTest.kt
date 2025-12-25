@@ -89,9 +89,6 @@ class AuthControllerDocsTest : RestDocsTestSupport() {
                                             "data.user.profileImageUrl",
                                         ).type(JsonFieldType.STRING).description("프로필 이미지 URL").optional(),
                                         fieldWithPath("data.user.hasPassword").type(JsonFieldType.BOOLEAN).description("비밀번호 설정 여부"),
-                                        fieldWithPath(
-                                            "data.user.linkedSocialAccounts",
-                                        ).type(JsonFieldType.ARRAY).description("연동된 소셜 계정 목록"),
                                         fieldWithPath("data.token").type(JsonFieldType.STRING).description("JWT 액세스 토큰"),
                                         fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰").optional(),
                                         fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보").optional(),
@@ -150,7 +147,6 @@ class AuthControllerDocsTest : RestDocsTestSupport() {
                                             "data.user.profileImageUrl",
                                         ).type(JsonFieldType.STRING).description("프로필 이미지 URL").optional(),
                                         fieldWithPath("data.user.hasPassword").type(JsonFieldType.BOOLEAN).description("비밀번호 설정 여부"),
-                                        fieldWithPath("data.user.linkedSocialAccounts").type(JsonFieldType.ARRAY).description("연동된 소셜 계정"),
                                         fieldWithPath("data.token").type(JsonFieldType.STRING).description("JWT 액세스 토큰"),
                                         fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰").optional(),
                                         fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보").optional(),
@@ -224,7 +220,6 @@ class AuthControllerDocsTest : RestDocsTestSupport() {
                 createdAt = LocalDateTime.now(),
                 hasPassword = true,
                 profileImageUrl = null,
-                linkedSocialAccounts = listOf("GOOGLE"),
             )
 
         every { authService.getMe(testUserId) } returns response
@@ -260,7 +255,6 @@ class AuthControllerDocsTest : RestDocsTestSupport() {
                                         fieldWithPath(
                                             "data.profileImageUrl",
                                         ).type(JsonFieldType.STRING).description("프로필 이미지 URL").optional(),
-                                        fieldWithPath("data.linkedSocialAccounts").type(JsonFieldType.ARRAY).description("연동된 소셜 계정"),
                                         fieldWithPath("error").type(JsonFieldType.NULL).description("에러 정보").optional(),
                                     ).build(),
                             ),
@@ -313,7 +307,6 @@ class AuthControllerDocsTest : RestDocsTestSupport() {
                     role = "USER",
                     profileImageUrl = null,
                     hasPassword = true,
-                    linkedSocialAccounts = emptyList(),
                 ),
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         )

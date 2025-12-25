@@ -221,43 +221,6 @@ class AuthEventPublisherTest {
     }
 
     @Nested
-    @DisplayName("publishSocialAccountLinked")
-    inner class PublishSocialAccountLinkedTest {
-        @Test
-        fun `SocialAccountLinkedEvent를 발행해야 한다`() {
-            // Given
-            val eventSlot = slot<SocialAccountLinkedEvent>()
-
-            // When
-            publisher.publishSocialAccountLinked(1L, "test@example.com", "GOOGLE")
-
-            // Then
-            verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
-            assertThat(eventSlot.captured.userId).isEqualTo(1L)
-            assertThat(eventSlot.captured.email).isEqualTo("test@example.com")
-            assertThat(eventSlot.captured.provider).isEqualTo("GOOGLE")
-        }
-    }
-
-    @Nested
-    @DisplayName("publishSocialAccountUnlinked")
-    inner class PublishSocialAccountUnlinkedTest {
-        @Test
-        fun `SocialAccountUnlinkedEvent를 발행해야 한다`() {
-            // Given
-            val eventSlot = slot<SocialAccountUnlinkedEvent>()
-
-            // When
-            publisher.publishSocialAccountUnlinked(1L, "test@example.com", "GOOGLE")
-
-            // Then
-            verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
-            assertThat(eventSlot.captured.userId).isEqualTo(1L)
-            assertThat(eventSlot.captured.provider).isEqualTo("GOOGLE")
-        }
-    }
-
-    @Nested
     @DisplayName("이벤트 타임스탬프")
     inner class EventTimestampTest {
         @Test

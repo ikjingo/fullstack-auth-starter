@@ -1,12 +1,9 @@
 package com.starter.api.auth.service
 
 import com.starter.api.auth.config.AccountLockoutProperties
-import com.starter.api.auth.config.PasswordResetProperties
-import com.starter.api.auth.controller.request.ForgotPasswordRequest
 import com.starter.api.auth.controller.request.RefreshTokenRequest
 import com.starter.api.auth.controller.request.SignInRequest
 import com.starter.api.auth.controller.request.SignUpRequest
-import com.starter.api.auth.controller.request.VerifyCodeRequest
 import com.starter.api.auth.event.AuthEventPublisher
 import com.starter.api.auth.security.jwt.JwtProperties
 import com.starter.api.auth.security.jwt.JwtTokenProvider
@@ -14,19 +11,13 @@ import com.starter.api.auth.service.audit.AuditLogService
 import com.starter.api.auth.service.auth.AuthenticationService
 import com.starter.api.auth.service.auth.LoginAttemptService
 import com.starter.api.auth.service.auth.PasswordService
-import com.starter.api.auth.service.auth.SocialAuthService
 import com.starter.api.auth.service.metrics.AuthMetricsService
 import com.starter.api.auth.service.session.SessionService
 import com.starter.api.auth.service.token.TokenBlacklistService
 import com.starter.core.api.support.error.CoreApiException
 import com.starter.core.api.support.error.ErrorType
-import com.starter.storage.db.user.AuthProvider
-import com.starter.storage.db.user.PasswordResetCodeEntity
-import com.starter.storage.db.user.PasswordResetCodeRepository
 import com.starter.storage.db.user.RefreshTokenEntity
 import com.starter.storage.db.user.RefreshTokenRepository
-import com.starter.storage.db.user.SocialAccountEntity
-import com.starter.storage.db.user.SocialAccountRepository
 import com.starter.storage.db.user.UserEntity
 import com.starter.storage.db.user.UserRepository
 import com.starter.storage.db.user.UserRole
@@ -50,14 +41,10 @@ import java.util.Optional
 @DisplayName("AuthService")
 class AuthServiceTest {
     private lateinit var userRepository: UserRepository
-    private lateinit var socialAccountRepository: SocialAccountRepository
     private lateinit var refreshTokenRepository: RefreshTokenRepository
-    private lateinit var passwordResetCodeRepository: PasswordResetCodeRepository
     private lateinit var jwtTokenProvider: JwtTokenProvider
     private lateinit var jwtProperties: JwtProperties
     private lateinit var passwordEncoder: PasswordEncoder
-    private lateinit var googleOAuthService: GoogleOAuthService
-    private lateinit var passwordResetProperties: PasswordResetProperties
     private lateinit var tokenBlacklistService: TokenBlacklistService
     private lateinit var loginAttemptService: LoginAttemptService
     private lateinit var auditLogService: AuditLogService
@@ -67,7 +54,6 @@ class AuthServiceTest {
 
     // Sub-services
     private lateinit var authenticationService: AuthenticationService
-    private lateinit var socialAuthService: SocialAuthService
     private lateinit var passwordService: PasswordService
 
     private lateinit var authService: AuthService
@@ -75,9 +61,7 @@ class AuthServiceTest {
     @BeforeEach
     fun setUp() {
         userRepository = mockk(relaxed = true)
-        socialAccountRepository = mockk(relaxed = true)
         refreshTokenRepository = mockk(relaxed = true)
-        passwordResetCodeRepository = mockk(relaxed = true)
         jwtProperties =
             JwtProperties(
                 secret = "test-secret-key-that-is-at-least-32-characters-long-for-hmac-sha256",
@@ -87,8 +71,6 @@ class AuthServiceTest {
             )
         jwtTokenProvider = JwtTokenProvider(jwtProperties)
         passwordEncoder = BCryptPasswordEncoder()
-        googleOAuthService = mockk(relaxed = true)
-        passwordResetProperties = PasswordResetProperties(codeExpirationMinutes = 10)
         tokenBlacklistService = mockk(relaxed = true)
         auditLogService = mockk(relaxed = true)
         authMetricsService = mockk(relaxed = true)
@@ -106,14 +88,12 @@ class AuthServiceTest {
 
         // Default mock behavior for save methods to return the argument
         every { refreshTokenRepository.save(any()) } answers { firstArg() }
-        every { passwordResetCodeRepository.save(any()) } answers { firstArg() }
         every { userRepository.save(any()) } answers { firstArg() }
 
         // Create sub-services
         authenticationService =
             AuthenticationService(
                 userRepository = userRepository,
-                socialAccountRepository = socialAccountRepository,
                 refreshTokenRepository = refreshTokenRepository,
                 jwtTokenProvider = jwtTokenProvider,
                 jwtProperties = jwtProperties,
@@ -126,22 +106,12 @@ class AuthServiceTest {
                 eventPublisher = eventPublisher,
             )
 
-        socialAuthService =
-            SocialAuthService(
-                socialAccountRepository = socialAccountRepository,
-                googleOAuthService = googleOAuthService,
-                authenticationService = authenticationService,
-                eventPublisher = eventPublisher,
-            )
-
         passwordService =
             PasswordService(
                 userRepository = userRepository,
-                passwordResetCodeRepository = passwordResetCodeRepository,
                 refreshTokenRepository = refreshTokenRepository,
                 passwordEncoder = passwordEncoder,
                 authenticationService = authenticationService,
-                passwordResetProperties = passwordResetProperties,
                 eventPublisher = eventPublisher,
             )
 
@@ -149,7 +119,6 @@ class AuthServiceTest {
         authService =
             AuthService(
                 authenticationService = authenticationService,
-                socialAuthService = socialAuthService,
                 passwordService = passwordService,
             )
     }
@@ -217,7 +186,6 @@ class AuthServiceTest {
             val user = createUserEntity(1L, request.email, "테스트유저", encodedPassword)
 
             every { userRepository.findByEmailAndStatus(request.email, UserStatus.ACTIVE) } returns user
-            every { socialAccountRepository.findAllByUser(user) } returns emptyList()
             every { userRepository.findById(user.id) } returns Optional.of(user)
             every { userRepository.save(any()) } answers { firstArg() }
 
@@ -267,11 +235,11 @@ class AuthServiceTest {
         }
 
         @Test
-        fun `비밀번호 없는 OAuth 계정으로 로그인 시 예외가 발생해야 한다`() {
+        fun `비밀번호 없는 계정으로 로그인 시 예외가 발생해야 한다`() {
             // Given
             val request =
                 SignInRequest(
-                    email = "oauth@example.com",
+                    email = "nopassword@example.com",
                     password = "anypassword",
                 )
             val user = createUserEntity(1L, request.email, "테스트유저", password = null)
@@ -281,7 +249,7 @@ class AuthServiceTest {
             // When & Then
             assertThatThrownBy { authService.signIn(request) }
                 .isInstanceOf(CoreApiException::class.java)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.OAUTH_ACCOUNT_NO_PASSWORD)
+                .hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_CREDENTIALS)
         }
     }
 
@@ -346,7 +314,7 @@ class AuthServiceTest {
                 RefreshTokenEntity(
                     user = user,
                     token = refreshToken,
-                    expiresAt = LocalDateTime.now().minusDays(1), // 만료됨
+                    expiresAt = LocalDateTime.now().minusDays(1),
                     revoked = false,
                 )
 
@@ -359,7 +327,7 @@ class AuthServiceTest {
         }
 
         @Test
-        fun `토큰 갱신 시 기존 토큰이 삭제되어야 한다 (Token Rotation)`() {
+        fun `토큰 갱신 시 기존 토큰이 삭제되어야 한다`() {
             // Given
             val user = createUserEntity(1L, "test@example.com", "테스트유저")
             val oldRefreshToken = jwtTokenProvider.createRefreshToken(user.id, user.email)
@@ -380,11 +348,8 @@ class AuthServiceTest {
             val result = authService.refresh(request)
 
             // Then
-            // 1. 기존 토큰이 삭제됨 (Token Rotation의 핵심)
             verify(exactly = 1) { refreshTokenRepository.delete(refreshTokenEntity) }
-            // 2. 새 토큰이 발급됨
             assertThat(result.refreshToken).isNotBlank()
-            // 3. 새 토큰이 저장됨
             verify(exactly = 1) { refreshTokenRepository.save(any()) }
         }
 
@@ -399,7 +364,7 @@ class AuthServiceTest {
                     user = user,
                     token = revokedRefreshToken,
                     expiresAt = LocalDateTime.now().plusDays(7),
-                    revoked = true, // 이미 폐기됨
+                    revoked = true,
                 )
 
             every { refreshTokenRepository.findByToken(revokedRefreshToken) } returns revokedTokenEntity
@@ -420,7 +385,7 @@ class AuthServiceTest {
             val userId = 1L
             val user = createUserEntity(userId, "test@example.com", "테스트유저")
 
-            every { userRepository.findByIdWithSocialAccounts(userId) } returns user
+            every { userRepository.findById(userId) } returns Optional.of(user)
 
             // When
             val result = authService.getMe(userId)
@@ -435,93 +400,12 @@ class AuthServiceTest {
             // Given
             val userId = 999L
 
-            every { userRepository.findByIdWithSocialAccounts(userId) } returns null
+            every { userRepository.findById(userId) } returns Optional.empty()
 
             // When & Then
             assertThatThrownBy { authService.getMe(userId) }
                 .isInstanceOf(CoreApiException::class.java)
                 .hasFieldOrPropertyWithValue("errorType", ErrorType.USER_NOT_FOUND)
-        }
-    }
-
-    @Nested
-    @DisplayName("forgotPassword 메서드")
-    inner class ForgotPasswordTest {
-        @Test
-        fun `존재하는 이메일에 대해 인증코드를 생성해야 한다`() {
-            // Given
-            val request = ForgotPasswordRequest(email = "test@example.com")
-            val user = createUserEntity(1L, request.email, "테스트유저")
-
-            every { userRepository.findByEmailAndStatus(request.email, UserStatus.ACTIVE) } returns user
-
-            // When
-            val result = authService.forgotPassword(request)
-
-            // Then
-            assertThat(result.message).contains("인증번호가 이메일로 발송되었습니다")
-            verify(exactly = 1) { passwordResetCodeRepository.invalidateAllByEmail(request.email) }
-            verify(exactly = 1) { passwordResetCodeRepository.save(any()) }
-        }
-
-        @Test
-        fun `존재하지 않는 이메일에도 동일한 메시지를 반환해야 한다`() {
-            // Given
-            val request = ForgotPasswordRequest(email = "notfound@example.com")
-
-            every { userRepository.findByEmailAndStatus(request.email, UserStatus.ACTIVE) } returns null
-
-            // When
-            val result = authService.forgotPassword(request)
-
-            // Then
-            assertThat(result.message).contains("인증번호가 이메일로 발송되었습니다")
-            verify(exactly = 0) { passwordResetCodeRepository.save(any()) }
-        }
-    }
-
-    @Nested
-    @DisplayName("verifyCode 메서드")
-    inner class VerifyCodeTest {
-        @Test
-        fun `유효한 인증코드를 검증해야 한다`() {
-            // Given
-            val request =
-                VerifyCodeRequest(
-                    email = "test@example.com",
-                    code = "123456",
-                )
-            val resetCode =
-                PasswordResetCodeEntity(
-                    email = request.email,
-                    code = request.code,
-                    expiresAt = LocalDateTime.now().plusMinutes(10),
-                )
-
-            every { passwordResetCodeRepository.findByEmailAndCodeAndUsedFalse(request.email, request.code) } returns resetCode
-
-            // When
-            val result = authService.verifyCode(request)
-
-            // Then
-            assertThat(result.message).contains("인증이 완료되었습니다")
-        }
-
-        @Test
-        fun `존재하지 않는 인증코드로 검증 시 예외가 발생해야 한다`() {
-            // Given
-            val request =
-                VerifyCodeRequest(
-                    email = "test@example.com",
-                    code = "wrongcode",
-                )
-
-            every { passwordResetCodeRepository.findByEmailAndCodeAndUsedFalse(request.email, request.code) } returns null
-
-            // When & Then
-            assertThatThrownBy { authService.verifyCode(request) }
-                .isInstanceOf(CoreApiException::class.java)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_RESET_CODE)
         }
     }
 
@@ -536,7 +420,6 @@ class AuthServiceTest {
             val user = createUserEntity(userId, "test@example.com", "테스트유저", password = null)
 
             every { userRepository.findById(userId) } returns Optional.of(user)
-            every { socialAccountRepository.findAllByUser(user) } returns emptyList()
 
             // When
             val result = authService.setPassword(userId, password, password)
@@ -622,55 +505,6 @@ class AuthServiceTest {
             assertThatThrownBy { authService.changePassword(userId, "anypassword", "newpassword", "newpassword") }
                 .isInstanceOf(CoreApiException::class.java)
                 .hasFieldOrPropertyWithValue("errorType", ErrorType.NO_PASSWORD_SET)
-        }
-    }
-
-    @Nested
-    @DisplayName("unlinkSocialAccount 메서드")
-    inner class UnlinkSocialAccountTest {
-        @Test
-        fun `소셜 계정 연동을 해제해야 한다`() {
-            // Given
-            val userId = 1L
-            val user = createUserEntity(userId, "test@example.com", "테스트유저", passwordEncoder.encode("password"))
-            val socialAccount =
-                SocialAccountEntity(
-                    user = user,
-                    provider = AuthProvider.GOOGLE,
-                    providerId = "google-id-123",
-                )
-
-            every { userRepository.findById(userId) } returns Optional.of(user)
-            every { socialAccountRepository.findAllByUser(user) } returns listOf(socialAccount)
-            every { socialAccountRepository.findByUserAndProvider(user, AuthProvider.GOOGLE) } returns socialAccount
-
-            // When
-            val result = authService.unlinkSocialAccount(userId, AuthProvider.GOOGLE)
-
-            // Then
-            assertThat(result.message).contains("연동이 해제되었습니다")
-            verify(exactly = 1) { socialAccountRepository.delete(socialAccount) }
-        }
-
-        @Test
-        fun `마지막 로그인 방법 해제 시 예외가 발생해야 한다`() {
-            // Given
-            val userId = 1L
-            val user = createUserEntity(userId, "test@example.com", "테스트유저", password = null)
-            val socialAccount =
-                SocialAccountEntity(
-                    user = user,
-                    provider = AuthProvider.GOOGLE,
-                    providerId = "google-id-123",
-                )
-
-            every { userRepository.findById(userId) } returns Optional.of(user)
-            every { socialAccountRepository.findAllByUser(user) } returns listOf(socialAccount)
-
-            // When & Then
-            assertThatThrownBy { authService.unlinkSocialAccount(userId, AuthProvider.GOOGLE) }
-                .isInstanceOf(CoreApiException::class.java)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.CANNOT_UNLINK_ONLY_LOGIN_METHOD)
         }
     }
 

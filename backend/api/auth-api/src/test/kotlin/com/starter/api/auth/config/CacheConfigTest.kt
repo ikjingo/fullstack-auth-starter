@@ -62,17 +62,6 @@ class CacheConfigTest {
         }
 
         @Test
-        fun `socialAccounts 캐시가 등록되어야 한다`() {
-            // When
-            val cacheManager = cacheConfig.cacheManager()
-            val cache = cacheManager.getCache(CacheConfig.CACHE_SOCIAL_ACCOUNTS)
-
-            // Then
-            assertThat(cache).isNotNull
-            assertThat(cache?.name).isEqualTo(CacheConfig.CACHE_SOCIAL_ACCOUNTS)
-        }
-
-        @Test
         fun `모든 필수 캐시가 등록되어야 한다`() {
             // Given
             val requiredCaches =
@@ -80,7 +69,6 @@ class CacheConfigTest {
                     CacheConfig.CACHE_TOKEN_BLACKLIST,
                     CacheConfig.CACHE_USERS,
                     CacheConfig.CACHE_USERS_BY_EMAIL,
-                    CacheConfig.CACHE_SOCIAL_ACCOUNTS,
                 )
 
             // When
@@ -161,11 +149,6 @@ class CacheConfigTest {
         @Test
         fun `CACHE_USERS_BY_EMAIL 상수가 올바른 값을 가져야 한다`() {
             assertThat(CacheConfig.CACHE_USERS_BY_EMAIL).isEqualTo("usersByEmail")
-        }
-
-        @Test
-        fun `CACHE_SOCIAL_ACCOUNTS 상수가 올바른 값을 가져야 한다`() {
-            assertThat(CacheConfig.CACHE_SOCIAL_ACCOUNTS).isEqualTo("socialAccounts")
         }
     }
 }

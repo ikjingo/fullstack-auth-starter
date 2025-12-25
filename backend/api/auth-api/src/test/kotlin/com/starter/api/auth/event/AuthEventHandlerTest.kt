@@ -153,44 +153,6 @@ class AuthEventHandlerTest {
     }
 
     @Nested
-    @DisplayName("handleSocialAccountLinked")
-    inner class HandleSocialAccountLinkedTest {
-        @Test
-        fun `SocialAccountLinkedEvent를 처리해야 한다`() {
-            // Given
-            val event = SocialAccountLinkedEvent(1L, "test@example.com", "GOOGLE")
-
-            // When & Then
-            handler.handleSocialAccountLinked(event)
-        }
-
-        @Test
-        fun `다양한 provider의 SocialAccountLinkedEvent를 처리해야 한다`() {
-            // Given
-            val providers = listOf("GOOGLE", "NAVER", "KAKAO")
-
-            // When & Then
-            providers.forEach { provider ->
-                val event = SocialAccountLinkedEvent(1L, "test@example.com", provider)
-                handler.handleSocialAccountLinked(event)
-            }
-        }
-    }
-
-    @Nested
-    @DisplayName("handleSocialAccountUnlinked")
-    inner class HandleSocialAccountUnlinkedTest {
-        @Test
-        fun `SocialAccountUnlinkedEvent를 처리해야 한다`() {
-            // Given
-            val event = SocialAccountUnlinkedEvent(1L, "test@example.com", "GOOGLE")
-
-            // When & Then
-            handler.handleSocialAccountUnlinked(event)
-        }
-    }
-
-    @Nested
     @DisplayName("이벤트 타임스탬프")
     inner class EventTimestampTest {
         @Test

@@ -8,7 +8,6 @@ import com.starter.core.api.support.error.CoreApiException
 import com.starter.core.api.support.error.ErrorType
 import com.starter.storage.db.token.TokenBlacklistRepository
 import com.starter.storage.db.user.RefreshTokenRepository
-import com.starter.storage.db.user.SocialAccountRepository
 import com.starter.storage.db.user.UserEntity
 import com.starter.storage.db.user.UserRepository
 import com.starter.storage.db.user.UserStatus
@@ -50,9 +49,6 @@ class AuthFlowIntegrationTest {
     private lateinit var refreshTokenRepository: RefreshTokenRepository
 
     @Autowired
-    private lateinit var socialAccountRepository: SocialAccountRepository
-
-    @Autowired
     private lateinit var tokenBlacklistRepository: TokenBlacklistRepository
 
     @Autowired
@@ -71,7 +67,6 @@ class AuthFlowIntegrationTest {
     private fun cleanUp() {
         tokenBlacklistRepository.deleteAll()
         refreshTokenRepository.deleteAll()
-        socialAccountRepository.deleteAll()
         userRepository.deleteAll()
     }
 

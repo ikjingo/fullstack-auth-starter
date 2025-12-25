@@ -14,7 +14,6 @@ import com.starter.core.api.support.error.CoreApiException
 import com.starter.core.api.support.error.ErrorType
 import com.starter.storage.db.user.RefreshTokenEntity
 import com.starter.storage.db.user.RefreshTokenRepository
-import com.starter.storage.db.user.SocialAccountRepository
 import com.starter.storage.db.user.UserEntity
 import com.starter.storage.db.user.UserRepository
 import com.starter.storage.db.user.UserRole
@@ -37,7 +36,6 @@ import java.util.Optional
 @DisplayName("AuthenticationService 테스트")
 class AuthenticationServiceTest {
     private lateinit var userRepository: UserRepository
-    private lateinit var socialAccountRepository: SocialAccountRepository
     private lateinit var refreshTokenRepository: RefreshTokenRepository
     private lateinit var jwtTokenProvider: JwtTokenProvider
     private lateinit var jwtProperties: JwtProperties
@@ -53,7 +51,6 @@ class AuthenticationServiceTest {
     @BeforeEach
     fun setUp() {
         userRepository = mockk(relaxed = true)
-        socialAccountRepository = mockk(relaxed = true)
         refreshTokenRepository = mockk(relaxed = true)
         jwtTokenProvider = mockk(relaxed = true)
         jwtProperties =
@@ -74,7 +71,6 @@ class AuthenticationServiceTest {
         authenticationService =
             AuthenticationService(
                 userRepository = userRepository,
-                socialAccountRepository = socialAccountRepository,
                 refreshTokenRepository = refreshTokenRepository,
                 jwtTokenProvider = jwtTokenProvider,
                 jwtProperties = jwtProperties,
@@ -179,7 +175,6 @@ class AuthenticationServiceTest {
             every { jwtTokenProvider.createAccessToken(any(), any(), any()) } returns "access-token"
             every { jwtTokenProvider.createRefreshToken(any(), any()) } returns "refresh-token"
             every { refreshTokenRepository.save(any()) } answers { firstArg() }
-            every { socialAccountRepository.findAllByUser(user) } returns emptyList()
 
             // When
             val result = authenticationService.signIn(request)
@@ -234,21 +229,21 @@ class AuthenticationServiceTest {
         }
 
         @Test
-        fun `OAuth 전용 계정으로 비밀번호 로그인 시도 시 예외가 발생해야 한다`() {
+        fun `비밀번호가 설정되지 않은 계정으로 로그인 시도 시 예외가 발생해야 한다`() {
             // Given
             val request =
                 SignInRequest(
-                    email = "oauth@example.com",
+                    email = "nopassword@example.com",
                     password = "Password123!",
                 )
-            val oauthUser = createUser(password = null) // OAuth 계정은 비밀번호가 null
+            val userWithoutPassword = createUser(password = null)
 
-            every { userRepository.findByEmailAndStatus(request.email, UserStatus.ACTIVE) } returns oauthUser
+            every { userRepository.findByEmailAndStatus(request.email, UserStatus.ACTIVE) } returns userWithoutPassword
 
             // When & Then
             assertThatThrownBy { authenticationService.signIn(request) }
                 .isInstanceOf(CoreApiException::class.java)
-                .hasFieldOrPropertyWithValue("errorType", ErrorType.OAUTH_ACCOUNT_NO_PASSWORD)
+                .hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_CREDENTIALS)
         }
     }
 
@@ -405,7 +400,7 @@ class AuthenticationServiceTest {
             val userId = 1L
             val user = createUser(id = userId)
 
-            every { userRepository.findByIdWithSocialAccounts(userId) } returns user
+            every { userRepository.findById(userId) } returns Optional.of(user)
 
             // When
             val result = authenticationService.getMe(userId)
@@ -421,7 +416,7 @@ class AuthenticationServiceTest {
             // Given
             val userId = 999L
 
-            every { userRepository.findByIdWithSocialAccounts(userId) } returns null
+            every { userRepository.findById(userId) } returns Optional.empty()
 
             // When & Then
             assertThatThrownBy { authenticationService.getMe(userId) }
@@ -444,7 +439,6 @@ class AuthenticationServiceTest {
             every { jwtTokenProvider.createAccessToken(any(), any(), any()) } returns "new-access-token"
             every { jwtTokenProvider.createRefreshToken(any(), any()) } returns "new-refresh-token"
             every { refreshTokenRepository.save(any()) } answers { firstArg() }
-            every { socialAccountRepository.findAllByUser(user) } returns emptyList()
 
             // When
             val result = authenticationService.updateNickname(userId, newNickname)
