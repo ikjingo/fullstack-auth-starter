@@ -95,10 +95,6 @@ management:
       export:
         enabled: true
 
-# 국립국어원 표준국어대사전 API
-dictionary:
-  api-key: ${DICTIONARY_API_KEY:}
-
 # SpringDoc OpenAPI
 springdoc:
   swagger-ui:

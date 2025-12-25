@@ -65,16 +65,6 @@ class SecurityConfig(
                         "/swagger-ui.html",
                         "/v3/api-docs/**",
                     ).permitAll()
-                    .requestMatchers(
-                        org.springframework.http.HttpMethod.GET,
-                        "/api/v1/nicknames",
-                        "/api/v1/nicknames/services/enabled",
-                        "/api/v1/nicknames/rarity-thresholds",
-                    ).permitAll()
-                    .requestMatchers(
-                        org.springframework.http.HttpMethod.POST,
-                        "/api/v1/nicknames",
-                    ).permitAll()
                     .anyRequest()
                     .authenticated()
             }.exceptionHandling { exceptions ->
