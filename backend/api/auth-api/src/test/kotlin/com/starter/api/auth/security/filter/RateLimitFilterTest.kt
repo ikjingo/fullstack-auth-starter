@@ -82,7 +82,6 @@ class RateLimitFilterTest {
             // Then
             verify { rateLimitService.tryConsume(any()) }
         }
-
     }
 
     @Nested
