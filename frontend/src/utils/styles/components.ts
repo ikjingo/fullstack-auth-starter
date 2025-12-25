@@ -67,15 +67,6 @@ export const badgeAvatar = 'w-9 h-9 rounded-md flex items-center justify-center 
 /** 뱃지 아바타 텍스트 */
 export const badgeAvatarText = 'text-sm font-semibold'
 
-/** 게임 뱃지 스타일 */
-export const gameBadge = 'text-xs rounded-md'
-
-/** 등급 뱃지 스타일 */
-export const rarityBadge = 'rounded-md'
-
-/** 게임 탭 트리거 */
-export const gameTabTrigger = 'px-5 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground'
-
 // ============================================================================
 // 스켈레톤
 // ============================================================================

@@ -1,12 +1,12 @@
 # Backend Test Patterns Reference
 
-이 문서는 Zenless 프로젝트의 백엔드 테스트 작성에 대한 상세 가이드입니다.
+이 문서는 Fullstack Auth Starter 프로젝트의 백엔드 테스트 작성에 대한 상세 가이드입니다.
 
 ## 목차
 
 1. [프로젝트 구조 이해](#프로젝트-구조-이해)
-2. [NicknameService 테스트 예시](#nicknameservice-테스트-예시)
-3. [NicknameController 테스트 예시](#nicknamecontroller-테스트-예시)
+2. [AuthService 테스트 예시](#authservice-테스트-예시)
+3. [AuthController 테스트 예시](#authcontroller-테스트-예시)
 4. [Repository 테스트 예시](#repository-테스트-예시)
 5. [Mocking 패턴](#mocking-패턴)
 6. [테스트 데이터 생성](#테스트-데이터-생성)
@@ -21,28 +21,26 @@
 ```
 backend/
 ├── api/
-│   └── auth-api/                    # 인증 및 닉네임 API
-│       └── src/main/kotlin/com/zenless/api/auth/
+│   └── auth-api/                    # 인증 API
+│       └── src/main/kotlin/com/starter/api/auth/
 │           ├── controller/          # REST Controllers
-│           │   ├── NicknameController.kt
 │           │   ├── AuthController.kt
 │           │   └── request/         # Request DTOs
 │           └── service/             # Business Logic
-│               ├── NicknameService.kt
 │               └── AuthService.kt
 ├── core/
 │   └── core-api/                    # 핵심 API 컴포넌트
-│       └── src/main/kotlin/com/zenless/core/api/
+│       └── src/main/kotlin/com/starter/core/api/
 │           └── support/
 │               ├── response/        # ApiResponse 래퍼
 │               └── error/           # 에러 처리
 └── storage/
     └── db-core/                     # JPA 엔티티 및 리포지토리
-        └── src/main/kotlin/com/zenless/storage/db/
-            └── nickname/
-                ├── NicknameEntity.kt
-                ├── NicknameRepository.kt
-                └── NicknameRepositoryCustomImpl.kt
+        └── src/main/kotlin/com/starter/storage/db/
+            └── user/
+                ├── UserEntity.kt
+                ├── UserRepository.kt
+                └── RefreshTokenEntity.kt
 ```
 
 ### ApiResponse 래퍼 구조
@@ -59,18 +57,19 @@ data class ApiResponse<T>(
 
 ---
 
-## NicknameService 테스트 예시
+## AuthService 테스트 예시
 
 ### 파일 위치
-`backend/api/auth-api/src/test/kotlin/com/zenless/api/auth/service/NicknameServiceTest.kt`
+`backend/api/auth-api/src/test/kotlin/com/starter/api/auth/service/AuthServiceTest.kt`
 
 ### 전체 테스트 코드
 
 ```kotlin
-package com.zenless.api.auth.service
+package com.starter.api.auth.service
 
-import com.zenless.api.auth.controller.request.SaveNicknameRequest
-import com.zenless.storage.db.nickname.*
+import com.starter.api.auth.controller.request.SignUpRequest
+import com.starter.api.auth.controller.request.SignInRequest
+import com.starter.storage.db.user.*
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -79,24 +78,22 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
-class NicknameServiceTest {
+class AuthServiceTest {
 
     @MockK
-    private lateinit var nicknameRepository: NicknameRepository
+    private lateinit var userRepository: UserRepository
 
     @MockK
-    private lateinit var mapleStoryCharacterRepository: MapleStoryCharacterRepository
+    private lateinit var refreshTokenRepository: RefreshTokenRepository
 
     @MockK
-    private lateinit var lostArkCharacterRepository: LostArkCharacterRepository
+    private lateinit var passwordEncoder: PasswordEncoder
 
     @InjectMockKs
-    private lateinit var nicknameService: NicknameService
+    private lateinit var authService: AuthService
 
     @BeforeEach
     fun setUp() {
@@ -104,153 +101,118 @@ class NicknameServiceTest {
     }
 
     @Test
-    fun `새로운 닉네임을 저장할 수 있어야 한다`() {
+    fun `새로운 사용자를 등록할 수 있어야 한다`() {
         // Given
-        val request = SaveNicknameRequest(
-            nickname = "테스트닉네임",
-            game = "MAPLESTORY",
-            worldName = "스카니아",
-            className = "아크메이지(불,독)",
-            characterLevel = 260,
-            guildName = "테스트길드"
+        val request = SignUpRequest(
+            email = "test@example.com",
+            password = "password123",
+            nickname = "테스트유저"
         )
 
-        every { nicknameRepository.findByNickname("테스트닉네임") } returns Optional.empty()
-        every { nicknameRepository.save(any()) } answers { firstArg() }
-        every { mapleStoryCharacterRepository.save(any()) } answers { firstArg() }
+        every { userRepository.findByEmail("test@example.com") } returns null
+        every { passwordEncoder.encode("password123") } returns "encodedPassword"
+        every { userRepository.save(any()) } answers { firstArg() }
 
         // When
-        val result = nicknameService.saveNicknames(listOf(request))
+        val result = authService.signUp(request)
 
         // Then
-        assertThat(result.savedCount).isEqualTo(1)
-        verify(exactly = 1) { nicknameRepository.save(any()) }
-        verify(exactly = 1) { mapleStoryCharacterRepository.save(any()) }
+        assertThat(result.email).isEqualTo("test@example.com")
+        verify(exactly = 1) { userRepository.save(any()) }
     }
 
     @Test
-    fun `기존 닉네임의 점수가 더 높으면 업데이트해야 한다`() {
+    fun `이미 존재하는 이메일로 가입 시 예외가 발생해야 한다`() {
         // Given
-        val existingNickname = NicknameEntity(
-            nickname = "테스트닉네임",
-            score = 50,
-            rarity = RarityType.C
+        val request = SignUpRequest(
+            email = "existing@example.com",
+            password = "password123",
+            nickname = "테스트유저"
+        )
+
+        val existingUser = UserEntity(
+            email = "existing@example.com",
+            password = "encodedPassword",
+            nickname = "기존유저"
+        )
+
+        every { userRepository.findByEmail("existing@example.com") } returns existingUser
+
+        // When & Then
+        assertThrows<DuplicateEmailException> {
+            authService.signUp(request)
+        }
+    }
+
+    @Test
+    fun `올바른 자격 증명으로 로그인할 수 있어야 한다`() {
+        // Given
+        val request = SignInRequest(
+            email = "test@example.com",
+            password = "password123"
+        )
+
+        val user = UserEntity(
+            email = "test@example.com",
+            password = "encodedPassword",
+            nickname = "테스트유저"
         ).apply { id = 1L }
 
-        val request = SaveNicknameRequest(
-            nickname = "테스트닉네임",
-            game = "MAPLESTORY",
-            worldName = "스카니아",
-            className = "아크메이지(불,독)",
-            characterLevel = 280,  // 높은 레벨 -> 높은 점수
-            guildName = "테스트길드"
-        )
-
-        every { nicknameRepository.findByNickname("테스트닉네임") } returns Optional.of(existingNickname)
-        every { mapleStoryCharacterRepository.save(any()) } answers { firstArg() }
+        every { userRepository.findByEmail("test@example.com") } returns user
+        every { passwordEncoder.matches("password123", "encodedPassword") } returns true
+        every { refreshTokenRepository.save(any()) } answers { firstArg() }
 
         // When
-        val result = nicknameService.saveNicknames(listOf(request))
+        val result = authService.signIn(request)
 
         // Then
-        assertThat(result.savedCount).isGreaterThanOrEqualTo(0)
+        assertThat(result.accessToken).isNotBlank()
+        assertThat(result.refreshToken).isNotBlank()
     }
 
     @Test
-    fun `닉네임 목록을 페이징하여 조회할 수 있어야 한다`() {
+    fun `잘못된 비밀번호로 로그인 시 예외가 발생해야 한다`() {
         // Given
-        val nicknames = listOf(
-            createNicknameEntity(1L, "닉네임1", 100, RarityType.SSS),
-            createNicknameEntity(2L, "닉네임2", 80, RarityType.SS)
-        )
-        val page = PageImpl(nicknames, PageRequest.of(0, 20), 2)
-
-        every {
-            nicknameRepository.searchNicknames(
-                any(), any(), any(), any(), any(), any()
-            )
-        } returns page
-
-        // When
-        val result = nicknameService.getNicknames(
-            games = null,
-            rarities = null,
-            search = null,
-            sort = "SCORE_DESC",
-            gameMode = "OR",
-            page = 1,
-            size = 20
+        val request = SignInRequest(
+            email = "test@example.com",
+            password = "wrongPassword"
         )
 
-        // Then
-        assertThat(result.nicknames).hasSize(2)
-        assertThat(result.totalElements).isEqualTo(2)
-        assertThat(result.currentPage).isEqualTo(1)
-    }
-
-    @Test
-    fun `게임 필터로 닉네임을 검색할 수 있어야 한다`() {
-        // Given
-        val nicknames = listOf(
-            createNicknameEntity(1L, "로아닉네임", 90, RarityType.S)
-        )
-        val page = PageImpl(nicknames, PageRequest.of(0, 20), 1)
-
-        every {
-            nicknameRepository.searchNicknames(
-                any(), any(), eq(listOf(GameType.LOSTARK)), any(), any(), any()
-            )
-        } returns page
-
-        // When
-        val result = nicknameService.getNicknames(
-            games = listOf("LOSTARK"),
-            rarities = null,
-            search = null,
-            sort = "SCORE_DESC",
-            gameMode = "OR",
-            page = 1,
-            size = 20
+        val user = UserEntity(
+            email = "test@example.com",
+            password = "encodedPassword",
+            nickname = "테스트유저"
         )
 
-        // Then
-        assertThat(result.nicknames).hasSize(1)
-    }
+        every { userRepository.findByEmail("test@example.com") } returns user
+        every { passwordEncoder.matches("wrongPassword", "encodedPassword") } returns false
 
-    private fun createNicknameEntity(
-        id: Long,
-        nickname: String,
-        score: Int,
-        rarity: RarityType
-    ): NicknameEntity {
-        return NicknameEntity(
-            nickname = nickname,
-            score = score,
-            rarity = rarity
-        ).apply { this.id = id }
+        // When & Then
+        assertThrows<InvalidCredentialsException> {
+            authService.signIn(request)
+        }
     }
 }
 ```
 
 ---
 
-## NicknameController 테스트 예시
+## AuthController 테스트 예시
 
 ### 파일 위치
-`backend/api/auth-api/src/test/kotlin/com/zenless/api/auth/controller/NicknameControllerTest.kt`
+`backend/api/auth-api/src/test/kotlin/com/starter/api/auth/controller/AuthControllerTest.kt`
 
 ### 전체 테스트 코드
 
 ```kotlin
-package com.zenless.api.auth.controller
+package com.starter.api.auth.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import com.zenless.api.auth.controller.request.SaveNicknameRequest
-import com.zenless.api.auth.controller.response.NicknamePageResponse
-import com.zenless.api.auth.controller.response.NicknameResponse
-import com.zenless.api.auth.controller.response.SaveNicknameResultResponse
-import com.zenless.api.auth.service.NicknameService
+import com.starter.api.auth.controller.request.SignUpRequest
+import com.starter.api.auth.controller.request.SignInRequest
+import com.starter.api.auth.controller.response.AuthResponse
+import com.starter.api.auth.service.AuthService
 import io.mockk.every
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -260,138 +222,95 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
-@WebMvcTest(NicknameController::class)
-class NicknameControllerTest {
+@WebMvcTest(AuthController::class)
+class AuthControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var nicknameService: NicknameService
+    private lateinit var authService: AuthService
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     @Test
-    fun `닉네임 목록 조회 시 페이징 정보와 함께 반환해야 한다`() {
+    fun `회원가입 성공 시 사용자 정보를 반환해야 한다`() {
         // Given
-        val response = NicknamePageResponse(
-            nicknames = listOf(
-                NicknameResponse(
-                    id = 1,
-                    nickname = "테스트닉네임",
-                    games = listOf("MAPLESTORY"),
-                    mapleStoryInfo = null,
-                    lostArkInfo = null,
-                    score = 100,
-                    rarity = "SSS",
-                    createdAt = "2024-01-01T00:00:00",
-                    updatedAt = "2024-01-01T00:00:00"
-                )
-            ),
-            totalElements = 1,
-            totalPages = 1,
-            currentPage = 1,
-            pageSize = 20,
-            hasNext = false
+        val request = SignUpRequest(
+            email = "test@example.com",
+            password = "password123",
+            nickname = "테스트유저"
         )
 
-        every {
-            nicknameService.getNicknames(any(), any(), any(), any(), any(), any(), any())
-        } returns response
+        val response = UserResponse(
+            id = 1,
+            email = "test@example.com",
+            nickname = "테스트유저",
+            role = "USER"
+        )
+
+        every { authService.signUp(any()) } returns response
 
         // When & Then
         mockMvc.perform(
-            get("/api/v1/nicknames")
-                .param("page", "1")
-                .param("size", "20")
+            post("/api/v1/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.result").value("SUCCESS"))
-            .andExpect(jsonPath("$.data.nicknames").isArray)
-            .andExpect(jsonPath("$.data.totalElements").value(1))
-            .andExpect(jsonPath("$.data.currentPage").value(1))
+            .andExpect(jsonPath("$.data.email").value("test@example.com"))
     }
 
     @Test
-    fun `게임과 희귀도 필터로 닉네임을 조회할 수 있어야 한다`() {
+    fun `로그인 성공 시 토큰을 반환해야 한다`() {
         // Given
-        val response = NicknamePageResponse(
-            nicknames = emptyList(),
-            totalElements = 0,
-            totalPages = 0,
-            currentPage = 1,
-            pageSize = 20,
-            hasNext = false
+        val request = SignInRequest(
+            email = "test@example.com",
+            password = "password123"
         )
 
-        every {
-            nicknameService.getNicknames(any(), any(), any(), any(), any(), any(), any())
-        } returns response
-
-        // When & Then
-        mockMvc.perform(
-            get("/api/v1/nicknames")
-                .param("games", "MAPLESTORY,LOSTARK")
-                .param("rarities", "SSS,SS")
-                .param("search", "테스트")
-                .param("sort", "SCORE_DESC")
-                .param("gameMode", "OR")
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.result").value("SUCCESS"))
-    }
-
-    @Test
-    fun `닉네임을 저장할 수 있어야 한다`() {
-        // Given
-        val requests = listOf(
-            SaveNicknameRequest(
-                nickname = "새닉네임",
-                game = "MAPLESTORY",
-                worldName = "스카니아",
-                className = "아크메이지(불,독)",
-                characterLevel = 260,
-                guildName = "테스트길드"
+        val response = AuthResponse(
+            accessToken = "accessToken123",
+            refreshToken = "refreshToken123",
+            user = UserResponse(
+                id = 1,
+                email = "test@example.com",
+                nickname = "테스트유저",
+                role = "USER"
             )
         )
 
-        val response = SaveNicknameResultResponse(
-            savedCount = 1,
-            message = "1개 저장 완료"
-        )
-
-        every { nicknameService.saveNicknames(any()) } returns response
+        every { authService.signIn(any()) } returns response
 
         // When & Then
         mockMvc.perform(
-            post("/api/v1/nicknames")
+            post("/api/v1/auth/signin")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requests))
+                .content(objectMapper.writeValueAsString(request))
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.result").value("SUCCESS"))
-            .andExpect(jsonPath("$.data.savedCount").value(1))
+            .andExpect(jsonPath("$.data.accessToken").value("accessToken123"))
     }
 
     @Test
-    fun `빈 요청 목록도 처리할 수 있어야 한다`() {
+    fun `유효하지 않은 요청 시 400 에러를 반환해야 한다`() {
         // Given
-        val response = SaveNicknameResultResponse(
-            savedCount = 0,
-            message = "0개 저장 완료"
+        val invalidRequest = mapOf(
+            "email" to "invalid-email",
+            "password" to "short"
         )
-
-        every { nicknameService.saveNicknames(any()) } returns response
 
         // When & Then
         mockMvc.perform(
-            post("/api/v1/nicknames")
+            post("/api/v1/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("[]")
+                .content(objectMapper.writeValueAsString(invalidRequest))
         )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.data.savedCount").value(0))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.result").value("ERROR"))
     }
 }
 ```
@@ -401,102 +320,80 @@ class NicknameControllerTest {
 ## Repository 테스트 예시
 
 ### 파일 위치
-`backend/storage/db-core/src/test/kotlin/com/zenless/storage/db/nickname/NicknameRepositoryTest.kt`
+`backend/storage/db-core/src/test/kotlin/com/starter/storage/db/user/UserRepositoryTest.kt`
 
 ### 전체 테스트 코드
 
 ```kotlin
-package com.zenless.storage.db.nickname
+package com.starter.storage.db.user
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.data.domain.PageRequest
 
 @DataJpaTest
-class NicknameRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
-    private lateinit var nicknameRepository: NicknameRepository
+    private lateinit var userRepository: UserRepository
 
     @Autowired
     private lateinit var entityManager: TestEntityManager
 
     @Test
-    fun `닉네임으로 엔티티를 조회할 수 있어야 한다`() {
+    fun `이메일로 사용자를 조회할 수 있어야 한다`() {
         // Given
-        val nickname = NicknameEntity(
-            nickname = "테스트닉네임",
-            score = 100,
-            rarity = RarityType.SSS
+        val user = UserEntity(
+            email = "test@example.com",
+            password = "encodedPassword",
+            nickname = "테스트유저"
         )
-        entityManager.persistAndFlush(nickname)
+        entityManager.persistAndFlush(user)
 
         // When
-        val found = nicknameRepository.findByNickname("테스트닉네임")
+        val found = userRepository.findByEmail("test@example.com")
 
         // Then
-        assertThat(found).isPresent
-        assertThat(found.get().nickname).isEqualTo("테스트닉네임")
-        assertThat(found.get().score).isEqualTo(100)
+        assertThat(found).isNotNull
+        assertThat(found?.email).isEqualTo("test@example.com")
+        assertThat(found?.nickname).isEqualTo("테스트유저")
     }
 
     @Test
-    fun `존재하지 않는 닉네임 조회 시 빈 Optional을 반환해야 한다`() {
+    fun `존재하지 않는 이메일 조회 시 null을 반환해야 한다`() {
         // When
-        val found = nicknameRepository.findByNickname("존재하지않는닉네임")
+        val found = userRepository.findByEmail("nonexistent@example.com")
 
         // Then
-        assertThat(found).isEmpty
+        assertThat(found).isNull()
     }
 
     @Test
-    fun `희귀도로 닉네임을 필터링할 수 있어야 한다`() {
+    fun `사용자 상태로 필터링할 수 있어야 한다`() {
         // Given
-        val sssNickname = NicknameEntity(nickname = "SSS닉네임", score = 100, rarity = RarityType.SSS)
-        val aaNickname = NicknameEntity(nickname = "SS닉네임", score = 80, rarity = RarityType.SS)
-        entityManager.persistAndFlush(sssNickname)
-        entityManager.persistAndFlush(aaNickname)
+        val activeUser = UserEntity(
+            email = "active@example.com",
+            password = "password",
+            nickname = "활성유저",
+            status = UserStatus.ACTIVE
+        )
+        val inactiveUser = UserEntity(
+            email = "inactive@example.com",
+            password = "password",
+            nickname = "비활성유저",
+            status = UserStatus.INACTIVE
+        )
+        entityManager.persistAndFlush(activeUser)
+        entityManager.persistAndFlush(inactiveUser)
 
         // When
-        val result = nicknameRepository.searchNicknames(
-            search = null,
-            rarities = listOf(RarityType.SSS),
-            games = null,
-            gameFilterMode = GameFilterMode.OR,
-            sortType = SortType.SCORE_DESC,
-            pageable = PageRequest.of(0, 20)
-        )
+        val result = userRepository.findByStatus(UserStatus.ACTIVE)
 
         // Then
-        assertThat(result.content).hasSize(1)
-        assertThat(result.content[0].rarity).isEqualTo(RarityType.SSS)
-    }
-
-    @Test
-    fun `점수 내림차순으로 정렬되어야 한다`() {
-        // Given
-        val lowScore = NicknameEntity(nickname = "낮은점수", score = 50, rarity = RarityType.C)
-        val highScore = NicknameEntity(nickname = "높은점수", score = 100, rarity = RarityType.SSS)
-        entityManager.persistAndFlush(lowScore)
-        entityManager.persistAndFlush(highScore)
-
-        // When
-        val result = nicknameRepository.searchNicknames(
-            search = null,
-            rarities = null,
-            games = null,
-            gameFilterMode = GameFilterMode.OR,
-            sortType = SortType.SCORE_DESC,
-            pageable = PageRequest.of(0, 20)
-        )
-
-        // Then
-        assertThat(result.content).hasSize(2)
-        assertThat(result.content[0].score).isEqualTo(100)
-        assertThat(result.content[1].score).isEqualTo(50)
+        assertThat(result).hasSize(1)
+        assertThat(result[0].email).isEqualTo("active@example.com")
     }
 }
 ```
@@ -532,13 +429,13 @@ verifyOrder {
 ### Capture를 이용한 인자 검증
 
 ```kotlin
-val slot = slot<NicknameEntity>()
+val slot = slot<UserEntity>()
 every { repository.save(capture(slot)) } answers { slot.captured }
 
-service.saveNickname(request)
+service.createUser(request)
 
-assertThat(slot.captured.nickname).isEqualTo("테스트")
-assertThat(slot.captured.score).isGreaterThan(0)
+assertThat(slot.captured.email).isEqualTo("test@example.com")
+assertThat(slot.captured.nickname).isNotBlank()
 ```
 
 ---
@@ -550,34 +447,42 @@ assertThat(slot.captured.score).isGreaterThan(0)
 ```kotlin
 object TestDataFactory {
 
-    fun createNicknameEntity(
+    fun createUserEntity(
         id: Long = 1L,
-        nickname: String = "테스트닉네임",
-        score: Int = 100,
-        rarity: RarityType = RarityType.SSS
-    ): NicknameEntity {
-        return NicknameEntity(
+        email: String = "test@example.com",
+        password: String = "encodedPassword",
+        nickname: String = "테스트유저",
+        role: UserRole = UserRole.USER,
+        status: UserStatus = UserStatus.ACTIVE
+    ): UserEntity {
+        return UserEntity(
+            email = email,
+            password = password,
             nickname = nickname,
-            score = score,
-            rarity = rarity
+            role = role,
+            status = status
         ).apply { this.id = id }
     }
 
-    fun createSaveNicknameRequest(
-        nickname: String = "테스트닉네임",
-        game: String = "MAPLESTORY",
-        worldName: String = "스카니아",
-        className: String = "아크메이지(불,독)",
-        characterLevel: Int = 260,
-        guildName: String? = null
-    ): SaveNicknameRequest {
-        return SaveNicknameRequest(
-            nickname = nickname,
-            game = game,
-            worldName = worldName,
-            className = className,
-            characterLevel = characterLevel,
-            guildName = guildName
+    fun createSignUpRequest(
+        email: String = "test@example.com",
+        password: String = "password123",
+        nickname: String = "테스트유저"
+    ): SignUpRequest {
+        return SignUpRequest(
+            email = email,
+            password = password,
+            nickname = nickname
+        )
+    }
+
+    fun createSignInRequest(
+        email: String = "test@example.com",
+        password: String = "password123"
+    ): SignInRequest {
+        return SignInRequest(
+            email = email,
+            password = password
         )
     }
 }
@@ -593,39 +498,52 @@ object TestDataFactory {
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class NicknameIntegrationTest {
+class AuthIntegrationTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var nicknameRepository: NicknameRepository
+    private lateinit var userRepository: UserRepository
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @Test
-    fun `닉네임 저장 후 조회 통합 테스트`() {
-        // Given
-        val request = listOf(
-            SaveNicknameRequest(
-                nickname = "통합테스트닉네임",
-                game = "MAPLESTORY",
-                worldName = "스카니아",
-                className = "아크메이지(불,독)",
-                characterLevel = 260,
-                guildName = null
-            )
+    fun `회원가입 후 로그인 통합 테스트`() {
+        // Given - 회원가입
+        val signUpRequest = SignUpRequest(
+            email = "integration@example.com",
+            password = "password123",
+            nickname = "통합테스트유저"
         )
 
-        // When - 저장
+        // When - 회원가입
         mockMvc.perform(
-            post("/api/v1/nicknames")
+            post("/api/v1/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(ObjectMapper().writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(signUpRequest))
         )
             .andExpect(status().isOk)
 
-        // Then - 조회
-        val saved = nicknameRepository.findByNickname("통합테스트닉네임")
-        assertThat(saved).isPresent
+        // Then - 사용자 확인
+        val saved = userRepository.findByEmail("integration@example.com")
+        assertThat(saved).isNotNull
+
+        // Given - 로그인
+        val signInRequest = SignInRequest(
+            email = "integration@example.com",
+            password = "password123"
+        )
+
+        // When & Then - 로그인
+        mockMvc.perform(
+            post("/api/v1/auth/signin")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signInRequest))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.data.accessToken").exists())
     }
 }
 ```

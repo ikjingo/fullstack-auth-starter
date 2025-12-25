@@ -184,8 +184,8 @@ class ApiControllerAdviceTest {
         @Test
         fun `ConstraintViolation 발생 시 400 상태 코드와 필드별 에러를 반환해야 한다`() {
             // Given
-            val violation1 = createMockViolation("saveNickname.nickname", "닉네임은 필수입니다")
-            val violation2 = createMockViolation("saveNickname.game", "게임 종류는 필수입니다")
+            val violation1 = createMockViolation("updateProfile.nickname", "닉네임은 필수입니다")
+            val violation2 = createMockViolation("updateProfile.email", "이메일은 필수입니다")
             val exception = ConstraintViolationException(setOf(violation1, violation2))
 
             // When
@@ -199,7 +199,7 @@ class ApiControllerAdviceTest {
             @Suppress("UNCHECKED_CAST")
             val errors = response.body?.error?.data as? Map<String, String>
             assertThat(errors).containsEntry("nickname", "닉네임은 필수입니다")
-            assertThat(errors).containsEntry("game", "게임 종류는 필수입니다")
+            assertThat(errors).containsEntry("email", "이메일은 필수입니다")
         }
 
         private fun createMockViolation(
